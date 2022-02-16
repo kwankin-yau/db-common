@@ -9,7 +9,7 @@ package com.lucendar.common.db.jdbc
 
 import com.lucendar.common.db.jdbc.DbHelper.JdbcContext
 import com.lucendar.common.db.types.SqlDialect
-import com.lucendar.common.db.types.Types.MultiBinding
+import com.lucendar.common.db.types.Types.{MultiBinding, MultiSetting}
 import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, PreparedStatementSetter, RowMapper}
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
@@ -118,6 +118,14 @@ trait DbSupport {
     inTransRequired(() => {
       jdbc.execute(new ConnectionCallback[Array[Int]] {
         override def doInConnection(con: Connection): Array[Int] = DbHelper.batchUpdate(sql, argumentEntities, binding, batchSize)(con)
+      })
+    })
+  }
+
+  protected def batchUpdateJdbc[T >: Null](sql: String, argumentEntities: util.Collection[T], binding: MultiSetting[T], batchSize: Int = 200): Array[Int] = {
+    inTransRequired(() => {
+      jdbc.execute(new ConnectionCallback[Array[Int]] {
+        override def doInConnection(con: Connection): Array[Int] = DbHelper.batchUpdateJdbc(sql, argumentEntities, binding, batchSize)(con)
       })
     })
   }

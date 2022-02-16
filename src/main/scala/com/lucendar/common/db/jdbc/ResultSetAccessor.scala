@@ -1,7 +1,7 @@
 package com.lucendar.common.db.jdbc
 
 
-import java.sql.{ResultSet, Timestamp}
+import java.sql.{ResultSet, SQLException, Timestamp}
 import java.time.{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, ZoneId, ZoneOffset}
 import com.google.gson.{Gson, GsonBuilder}
 import info.gratour.common.types.{EpochMillis, IncIndex}
@@ -211,6 +211,21 @@ class ResultSetAccessor(val resultSet: ResultSet) {
       EpochMillis(r.getTime)
   }
 
+  def epochMillisLong(): Long = {
+    val r = rs.getObject(colIndex.inc(), classOf[Timestamp])
+    if (rs.wasNull())
+      throw new SQLException("Can not convert `NULL` to Epoch milli-seconds.")
+    else
+      r.getTime
+  }
+
+  def epochMillisLongObj(): java.lang.Long = {
+    val r = rs.getObject(colIndex.inc(), classOf[Timestamp])
+    if (rs.wasNull())
+      null
+    else
+      r.getTime
+  }
 
   def json[T >: AnyRef]()(implicit m: Manifest[T]): T = {
     val s = rs.getString(colIndex.inc())

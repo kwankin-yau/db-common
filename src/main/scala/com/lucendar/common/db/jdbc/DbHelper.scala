@@ -7,17 +7,15 @@
  * ***************************************************************************** */
 package com.lucendar.common.db.jdbc
 
-import com.lucendar.common.db.types.Types.MultiBinding
+import com.lucendar.common.db.types.Types.{MultiBinding, MultiSetting}
 import com.lucendar.common.serv.utils.ServUtils
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.springframework.core.io.ResourceLoader
 import org.springframework.jdbc.core.{JdbcTemplate, PreparedStatementSetter, RowMapper}
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
-import org.springframework.transaction.TransactionManager
-import org.springframework.transaction.support.TransactionTemplate
 
-import java.sql.{Connection, PreparedStatement, ResultSet}
-import java.util
+import java.sql.{Connection, ResultSet}
+import java.{lang, util}
 import java.util.Properties
 import javax.sql.DataSource
 import scala.collection.mutable.ArrayBuffer
@@ -28,7 +26,7 @@ object DbHelper {
   /**
    * Create a HikariDataSource from given arguments.
    *
-   * @param jdbcUrl
+   * @param jdbcUrl                       jdbc url for data source
    * @param username                      database username, optional
    * @param password                      database password, optional
    * @param maxPoolSize                   maximum pool size, 0 for not specified
@@ -275,7 +273,37 @@ object DbHelper {
 
       argumentEntities.forEach(a => {
         st.clearParameters()
-        binding.apply(a, binder.restart())
+        binding.bind(a, binder.restart())
+        st.addBatch()
+
+        cnt += 1
+        if (cnt == batchSize) {
+          val updated = st.executeBatch()
+          r ++= updated
+
+          cnt = 0
+        }
+      })
+
+      if (cnt > 0)
+        r ++= st.executeBatch()
+    } finally {
+      st.close()
+    }
+
+    r.toArray
+  }
+
+  def batchUpdateJdbc[T >: Null](sql: String, argumentEntities: util.Collection[T], binding: MultiSetting[T], batchSize: Int = 200)(implicit conn: Connection): Array[Int] = {
+    val r: ArrayBuffer[Int] = ArrayBuffer()
+
+    val st = conn.prepareStatement(sql)
+    try {
+      var cnt = 0
+
+      argumentEntities.forEach(a => {
+        st.clearParameters()
+        binding.setParams(a, st)
         st.addBatch()
 
         cnt += 1
@@ -306,7 +334,7 @@ object DbHelper {
 
       argumentEntities.forEach(a => {
         st.clearParameters()
-        binding.apply(a, binder.restart())
+        binding.bind(a, binder.restart())
         st.addBatch()
 
         cnt += 1
@@ -334,5 +362,19 @@ object DbHelper {
 
   def callEx(sql: String, setter: StatementSetter = null)(implicit conn: Connection): Unit =
     call(sql, StatementSetterWrapper(setter))
+
+  val StringValueRowMapper: RowMapper[String] = new RowMapper[String] {
+    override def mapRow(rs: ResultSet, rowNum: Int): String = rs.getString(1)
+  }
+
+  val LongValueRowMapper: RowMapper[java.lang.Long] = new RowMapper[lang.Long] {
+    override def mapRow(rs: ResultSet, rowNum: Int): lang.Long = {
+      val r = rs.getLong(1)
+      if (rs.wasNull())
+        null
+      else
+        r
+    }
+  }
 
 }

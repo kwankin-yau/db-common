@@ -124,12 +124,20 @@ case class TableSchema(
   def upsertBuilderClassBind[T >: Null <: AnyRef](entryClass: Class[T]): UpsertBuilderClassBind[T] =
     new UpsertBuilderClassBind[T](this, entryClass)
 
+  def  checkPrimaryKey(): Unit = {
+    if (primaryKeyColumns == null || primaryKeyColumns.isEmpty)
+      throw ErrorWithCode.internalError("No primary key defined.")
+
+  }
+
   /**
    * generate parameterised delete sql
    *
    * @return
    */
   def deleteSql(): String = {
+    checkPrimaryKey()
+
     val str = new StringBuilder
     str.append("DELETE FROM ").append(tableName).append(" WHERE ")
     val flag = Flag(true)
@@ -157,6 +165,8 @@ case class TableSchema(
   }
 
   def deleteEntry[T](e: T)(implicit template: JdbcTemplate, classTag: ClassTag[T]): Boolean = {
+    checkPrimaryKey()
+
     val parameters = ArrayBuffer.empty[Object]
 
     val fields = CommonUtils.getInstanceFields(classTag.runtimeClass)
@@ -241,9 +251,6 @@ class TableSchemaBuilder(val tableName: String, val sqlDialect: SqlDialect) {
 
   def build(fieldNameMapper: FieldNameMapper = FieldNameMapper.INSTANCE): TableSchema = {
     val pkColumns = columns.filter(_.columnKind == ColumnKind.PRIMARY_KEY).toArray
-    if (pkColumns.isEmpty)
-      throw ErrorWithCode.internalError("No primary key defined.")
-
     new TableSchema(tableName, columns.toSeq, pkColumns, sqlDialect, fieldNameMapper)
   }
 
@@ -511,6 +518,8 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
   }
 
   private def generateOnConflictUpdate(str: StringBuilder, parameters: ArrayBuffer[Value]): Unit = {
+    tableSchema.checkPrimaryKey()
+
     val flag = Flag(true)
     tableSchema.columns.foreach(c => {
       if (!isUpdateExcluded(c.columnName) && c.columnKind.isPersisted) {

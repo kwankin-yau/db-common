@@ -9,8 +9,15 @@ package com.lucendar.common.db.types
 
 import com.lucendar.common.db.jdbc.StatementBinder
 
+import java.sql.PreparedStatement
+
 object Types {
 
-  type MultiBinding[T] = (T, StatementBinder) => Unit
+  trait MultiBinding[T] {
+    def bind(entry: T, binder: StatementBinder): Unit
+  }
 
+  trait MultiSetting[T] {
+    def setParams(entry: T, ps: PreparedStatement): Unit
+  }
 }
