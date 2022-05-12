@@ -44,11 +44,12 @@ trait SqlDialect {
 
 object SqlDialects {
 
-  val POSTGRESQL = "postgresql"
-  val H2 = "h2"
-  val ORACLE = "oracle"
-  val MSSQL = "mssql"
-  val MYSQL = "mysql"
+  final val POSTGRESQL = "postgresql"
+  final val H2 = "h2"
+  final val ORACLE = "oracle"
+  final val MSSQL = "mssql"
+  final val MYSQL = "mysql"
+  final val SQLITE = "sqlite"
 }
 
 //object SQLDialect_Pg extends SQLDialect {

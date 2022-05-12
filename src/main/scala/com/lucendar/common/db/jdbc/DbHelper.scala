@@ -14,7 +14,7 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.jdbc.core.{JdbcTemplate, PreparedStatementSetter, RowMapper}
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
-import java.sql.{Connection, ResultSet}
+import java.sql.{Connection, PreparedStatement, ResultSet}
 import java.{lang, util}
 import java.util.Properties
 import javax.sql.DataSource
@@ -22,6 +22,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Using
 
 object DbHelper {
+
+  final val DEFAULT_MAX_POOL_SIZE = 20
+  final val DEFAULT_LEAK_DETECTION_THRESHOLD_SECONDS = 20*60
 
   /**
    * Create a HikariDataSource from given arguments.
@@ -57,7 +60,24 @@ object DbHelper {
     new HikariDataSource(hc)
   }
 
-  def tryLoadHikariConfig(resourceLoader: ResourceLoader, configPropertiesFile: String): HikariConfig = {
+  /**
+   * Create a HikariDataSource from given arguments.
+   *
+   * @param jdbcUrl                       jdbc url for data source
+   * @param username                      database username, optional
+   * @param password                      database password, optional
+   * @param maxPoolSize                   maximum pool size, 0 for not specified
+   * @param leakDetectionThresholdSeconds time in seconds that it is a period of connection which does not return to pool will make pool start a leak detection, 0 for not specified
+   * @return data source
+   */
+  def createDataSource(
+                        jdbcUrl: String,
+                        username: String,
+                        password: String): DataSource =
+    createDataSource(jdbcUrl, username, password, DEFAULT_MAX_POOL_SIZE, DEFAULT_LEAK_DETECTION_THRESHOLD_SECONDS)
+
+
+    def tryLoadHikariConfig(resourceLoader: ResourceLoader, configPropertiesFile: String): HikariConfig = {
     var hc: HikariConfig = null
 
     val rs = ServUtils.tryLoadResource(configPropertiesFile, resourceLoader)
@@ -363,11 +383,11 @@ object DbHelper {
   def callEx(sql: String, setter: StatementSetter = null)(implicit conn: Connection): Unit =
     call(sql, StatementSetterWrapper(setter))
 
-  val StringValueRowMapper: RowMapper[String] = new RowMapper[String] {
+  final val StringValueRowMapper: RowMapper[String] = new RowMapper[String] {
     override def mapRow(rs: ResultSet, rowNum: Int): String = rs.getString(1)
   }
 
-  val LongValueRowMapper: RowMapper[java.lang.Long] = new RowMapper[lang.Long] {
+  final val LongValueRowMapper: RowMapper[java.lang.Long] = new RowMapper[lang.Long] {
     override def mapRow(rs: ResultSet, rowNum: Int): lang.Long = {
       val r = rs.getLong(1)
       if (rs.wasNull())
@@ -375,6 +395,41 @@ object DbHelper {
       else
         r
     }
+  }
+
+  def toTotalCountSql(relation: String): String =
+    "SELECT COUNT(1) FROM " + relation
+
+  def strPreparedStmtSetter(value: String): PreparedStatementSetter = new PreparedStatementSetter {
+    override def setValues(ps: PreparedStatement): Unit = ps.setString(1, value)
+  }
+
+  def intPreparedStmtSetter(value: Int): PreparedStatementSetter = new PreparedStatementSetter {
+    override def setValues(ps: PreparedStatement): Unit = ps.setInt(1, value)
+  }
+
+  def longPreparedStmtSetter(value: Long): PreparedStatementSetter = new PreparedStatementSetter {
+    override def setValues(ps: PreparedStatement): Unit = ps.setLong(1, value)
+  }
+
+  def boolPreparedStmtSetter(value: Boolean): PreparedStatementSetter = new PreparedStatementSetter {
+    override def setValues(ps: PreparedStatement): Unit = ps.setBoolean(1, value)
+  }
+
+  def strStatementSetter(value: String): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setString(value)
+  }
+
+  def intStatementSetter(value: Int): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setInt(value)
+  }
+
+  def longStatementSetter(value: Long): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setLong(value)
+  }
+
+  def boolStatementSetter(value: Boolean): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setBool(value)
   }
 
 }

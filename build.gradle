@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.lucendar.common'
-version '1.0.1'
+version '1.0.2'
 
 compileJava.options.encoding = 'UTF-8'
 compileScala.options.encoding = 'UTF-8'

@@ -18,9 +18,9 @@ import java.util
 
 trait DbSupport {
 
-  protected def sqlDialect: SqlDialect
+  def sqlDialect: SqlDialect
 
-  protected def jdbcCtx: JdbcContext
+  def jdbcCtx: JdbcContext
 
   implicit protected def jdbc: JdbcTemplate = jdbcCtx.jdbcTemplate
 
@@ -28,7 +28,7 @@ trait DbSupport {
 
   protected def defaultSchemaName: String = sqlDialect.publicSchemaName
 
-  protected def inTransRequired[T](op: () => T): T = {
+  protected def tx[T](op: () => T): T = {
     val ts = txMgr.getTransaction(null)
     try {
       val r = op.apply()
@@ -40,6 +40,9 @@ trait DbSupport {
         throw t
     }
   }
+
+
+  protected def inTransRequired[T](op: () => T): T = tx(op)
 
   protected def existsQry(sql: String, pss: PreparedStatementSetter): Boolean = jdbc.execute(new ConnectionCallback[Boolean] {
     override def doInConnection(con: Connection): Boolean = DbHelper.existsQry(sql, pss)(con)
