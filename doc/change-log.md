@@ -1,3 +1,11 @@
+# 1.0.3 [2022-05-12]
+## Changed
+- Dependencies:
+    - Bump `spring-jdbc`, `spring-web` from `5.3.9` to `5.3.19`
+    - Bump `HikariCP` from `5.0.0` to `5.0.1`
+    - Bump `scala-library`, `scala-reflect` from `2.13.6` to `2.13.8`
+    - Bump `gratour-common` from `3.2.2` to `3.2.5`
+  
 # 1.0.2 [2022-03-12]
 ## Added
 - `com.lucendar.common.db.types.SqlDialects.SQLITE`

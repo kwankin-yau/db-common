@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.lucendar.common'
-version '1.0.2'
+version '1.0.3'
 
 compileJava.options.encoding = 'UTF-8'
 compileScala.options.encoding = 'UTF-8'
@@ -20,20 +20,20 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
-    implementation('org.scala-lang:scala-library:2.13.6')
-    implementation('org.scala-lang:scala-reflect:2.13.6')
+    implementation('org.scala-lang:scala-library:2.13.8')
+    implementation('org.scala-lang:scala-reflect:2.13.8')
 
     implementation('com.typesafe.scala-logging:scala-logging_2.13:3.9.4')
 
-    implementation('org.springframework:spring-jdbc:5.3.9')
-    implementation('org.springframework:spring-web:5.3.9')
+    implementation('org.springframework:spring-jdbc:5.3.19')
+    implementation('org.springframework:spring-web:5.3.19')
 
-    api 'com.zaxxer:HikariCP:5.0.0'
+    api 'com.zaxxer:HikariCP:5.0.1'
     // https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser
     implementation group: 'com.github.jsqlparser', name: 'jsqlparser', version: '4.2'
 
 
-    implementation('info.gratour.common:gratour-common:3.2.2')
+    implementation('info.gratour.common:gratour-common:3.2.5')
     implementation('com.lucendar.common:server-common:1.0.1')
 }
 

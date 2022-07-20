@@ -14,8 +14,8 @@ public interface ToDbFieldNameMapper {
      *     <li>For QueryParamsSpec, the returned database column names are in an `OR` relation.</li>     *
      * </ol>
      *
-     * @param apiFieldName
-     * @return
+     * @param apiFieldName API field name.
+     * @return corresponding database column name.
      */
     String[] toDbColumnNames(String apiFieldName);
 
