@@ -1,5 +1,10 @@
 # 1.0.3 [2022-05-12]
+## Improvement
+- `com.lucendar.common.db.jdbc.DbHelper.qryIntValue, qryIntValueEx` added
+- `com.lucendar.common.db.jdbc.DbSupport.qryIntValue, qryIntValueEx` added
+
 ## Changed
+- Shorten SqlDialect ID
 - Dependencies:
     - Bump `spring-jdbc`, `spring-web` from `5.3.9` to `5.3.19`
     - Bump `HikariCP` from `5.0.0` to `5.0.1`

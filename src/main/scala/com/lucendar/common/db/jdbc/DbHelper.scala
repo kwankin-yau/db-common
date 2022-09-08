@@ -158,6 +158,12 @@ object DbHelper {
   def qryValueEx[T](sql: String, setter: StatementSetter, mapper: ResultSetMapper[T])(implicit conn: Connection): Option[T] =
     qryValue(sql, StatementSetterWrapper(setter), RowMapperWrapper(mapper))
 
+  def qryIntValue(sql: String, pss: PreparedStatementSetter = null)(implicit conn: Connection): Option[Int] =
+    qryValue(sql, pss, (rs, _) => rs.getInt(1))
+
+  def qryIntValueEx(sql: String, setter: StatementSetter = null)(implicit conn: Connection): Option[Int] =
+    qryValueEx(sql, setter, rs => rs.int())
+
   def qryLongValue(sql: String, pss: PreparedStatementSetter = null)(implicit conn: Connection): Option[Long] =
     qryValue(sql, pss, (rs, _) => rs.getLong(1))
 

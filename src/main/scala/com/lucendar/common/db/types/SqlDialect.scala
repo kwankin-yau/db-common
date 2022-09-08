@@ -7,6 +7,8 @@
  * ***************************************************************************** */
 package com.lucendar.common.db.types
 
+import info.gratour.common.error.ErrorWithCode
+
 import java.sql.Connection
 import scala.util.Using
 
@@ -44,12 +46,37 @@ trait SqlDialect {
 
 object SqlDialects {
 
-  final val POSTGRESQL = "postgresql"
+  final val POSTGRESQL = "pg"
   final val H2 = "h2"
   final val ORACLE = "oracle"
-  final val MSSQL = "mssql"
+  final val SQL_SERVER = "sqlserver"
   final val MYSQL = "mysql"
   final val SQLITE = "sqlite"
+
+
+  def detectIdFromJdbcUrl(jdbcUrl: String): String = {
+    var p = jdbcUrl
+    val idx = p.indexOf('/'.toChar)
+    if (idx > 0)
+      p = p.substring(0, idx)
+
+    if (p.contains("postgresql"))
+      POSTGRESQL
+    else if (p.contains("h2"))
+      H2
+    else if (p.contains("mysql"))
+      MYSQL
+    else if (p.contains("sqlserver"))
+      SQL_SERVER
+    else if (p.contains("oracle"))
+      ORACLE
+    else if (p.contains("sqlite"))
+      SQLITE
+    else
+      throw ErrorWithCode.invalidParam("jdbcUrl", s"Unrecognized SqlDialect: `$jdbcUrl`.")
+  }
+
+
 }
 
 //object SQLDialect_Pg extends SQLDialect {

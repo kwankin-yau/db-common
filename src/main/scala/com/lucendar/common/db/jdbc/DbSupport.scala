@@ -64,6 +64,14 @@ trait DbSupport {
   protected def qryValueEx[T](sql: String, setter: StatementSetter, mapper: ResultSetMapper[T]): Option[T] =
     qryValue(sql, StatementSetterWrapper(setter), RowMapperWrapper(mapper))
 
+  protected def qryIntValue(sql: String, pss: PreparedStatementSetter = null): Option[Int] =
+    jdbc.execute(new ConnectionCallback[Option[Int]] {
+      override def doInConnection(con: Connection): Option[Int] = DbHelper.qryIntValue(sql, pss)(con)
+    })
+
+  protected def qryIntValueEx(sql: String, setter: StatementSetter = null): Option[Int] =
+    qryIntValue(sql, StatementSetterWrapper(setter))
+
   protected def qryLongValue(sql: String, pss: PreparedStatementSetter = null): Option[Long] = jdbc.execute(new ConnectionCallback[Option[Long]] {
     override def doInConnection(con: Connection): Option[Long] = DbHelper.qryLongValue(sql, pss)(con)
   })

@@ -19,6 +19,9 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    // https://mvnrepository.com/artifact/org.scalatest/scalatest
+    testImplementation 'org.scalatest:scalatest_2.13:3.2.13'
+
 
     implementation('org.scala-lang:scala-library:2.13.8')
     implementation('org.scala-lang:scala-reflect:2.13.8')

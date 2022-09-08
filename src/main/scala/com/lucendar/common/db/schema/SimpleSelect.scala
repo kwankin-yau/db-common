@@ -108,6 +108,11 @@ class SimpleSelect(sql: String) {
     this
   }
 
+  def paginate(limit: Int,
+               page: Int // 1 based
+              ): SimpleSelect =
+    paginate(Pagination(limit, page))
+
   def limit(recordCount: Int): SimpleSelect = {
     if (paginationClause != null)
       throw new ErrorWithCode(Errors.ILLEGAL_STATE, "pagination and limit can not be both applied.")
