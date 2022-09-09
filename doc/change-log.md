@@ -1,3 +1,9 @@
+# 1.0.4 [2022-09-09]
+## Improvement
+- `com.lucendar.common.db.jdbc.DbHelper.qryList` add handle case for HookedMapper.mapRow return `null` 
+  when total record count is `0`.
+
+
 # 1.0.3 [2022-05-12]
 ## Improvement
 - `com.lucendar.common.db.jdbc.DbHelper.qryIntValue, qryIntValueEx` added

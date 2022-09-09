@@ -1,14 +1,13 @@
 package com.lucendar.common.db.jdbc
 
 
-import java.sql.{ResultSet, SQLException, Timestamp}
-import java.time.{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, ZoneId, ZoneOffset}
 import com.google.gson.{Gson, GsonBuilder}
 import info.gratour.common.types.{EpochMillis, IncIndex}
 import info.gratour.common.utils.DateTimeUtils
 import org.springframework.jdbc.core.RowMapper
 
-import java.util.TimeZone
+import java.sql.{ResultSet, SQLException, Timestamp}
+import java.time.{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, ZoneId}
 
 class ResultSetAccessor(val resultSet: ResultSet) {
 
@@ -183,7 +182,7 @@ class ResultSetAccessor(val resultSet: ResultSet) {
     rs.getObject(colIndex.inc(), classOf[LocalDateTime])
 
   /**
-   * Read OffsetDateTime value and convert to convenient date time format using given `zoneId` if available.
+   * Get current OffsetDateTime value and convert to convenient date time format using given `zoneId` if available.
    *
    * @param zoneId zone ID used switch time zone, null if use default timezone
    *
@@ -200,6 +199,11 @@ class ResultSetAccessor(val resultSet: ResultSet) {
       null
   }
 
+  /**
+   * Get current OffsetDateTime value and convert to convenient date time format using default `zoneId`.
+   *
+   * @return Convenient date time format string.
+   */
   def convenientDateTimeStr(): String = convenientDateTimeStr(null)
 
 

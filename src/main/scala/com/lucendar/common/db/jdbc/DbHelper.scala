@@ -198,8 +198,10 @@ object DbHelper {
       try {
         while (rs.next()) {
           val r = rowMapper.mapRow(rs, i)
-          i += 1
-          list.add(r)
+          if (r != null) {
+            i += 1
+            list.add(r)
+          }
         }
       } finally {
         rs.close()
