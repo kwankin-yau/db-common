@@ -1,3 +1,11 @@
+# 1.0.5 [2022-12-11]
+## Changed
+- Dependencies:
+  - Bump `scala-library` to 2.13.10
+  - Bump `scala-reflect` to 2.13.10
+  - Bump `gratour-common` to 3.2.7
+  - Bump `server-common` to 1.0.5
+
 # 1.0.4 [2022-09-09]
 ## Improvement
 - `com.lucendar.common.db.jdbc.DbHelper.qryList` add handle case for HookedMapper.mapRow return `null` 

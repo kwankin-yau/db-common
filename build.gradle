@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.lucendar.common'
-version '1.0.4'
+version '1.0.5'
 
 compileJava.options.encoding = 'UTF-8'
 compileScala.options.encoding = 'UTF-8'
@@ -23,8 +23,8 @@ dependencies {
     testImplementation 'org.scalatest:scalatest_2.13:3.2.13'
 
 
-    implementation('org.scala-lang:scala-library:2.13.8')
-    implementation('org.scala-lang:scala-reflect:2.13.8')
+    implementation('org.scala-lang:scala-library:2.13.10')
+    implementation('org.scala-lang:scala-reflect:2.13.10')
 
     implementation('com.typesafe.scala-logging:scala-logging_2.13:3.9.4')
 
@@ -36,8 +36,8 @@ dependencies {
     implementation group: 'com.github.jsqlparser', name: 'jsqlparser', version: '4.2'
 
 
-    implementation('info.gratour.common:gratour-common:3.2.5')
-    implementation('com.lucendar.common:server-common:1.0.1')
+    implementation('info.gratour.common:gratour-common:3.2.7')
+    implementation('com.lucendar.common:server-common:1.0.5')
 }
 
 test {
