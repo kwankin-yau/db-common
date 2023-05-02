@@ -5,10 +5,14 @@ plugins {
 }
 
 group 'com.lucendar.common'
-version '1.0.5'
+version '1.0.6'
 
 compileJava.options.encoding = 'UTF-8'
 compileScala.options.encoding = 'UTF-8'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
 
 
 repositories {
@@ -28,16 +32,16 @@ dependencies {
 
     implementation('com.typesafe.scala-logging:scala-logging_2.13:3.9.4')
 
-    implementation('org.springframework:spring-jdbc:5.3.19')
-    implementation('org.springframework:spring-web:5.3.19')
+    implementation('org.springframework:spring-jdbc:5.3.27')
+    implementation('org.springframework:spring-web:5.3.27')
 
     api 'com.zaxxer:HikariCP:5.0.1'
     // https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser
     implementation group: 'com.github.jsqlparser', name: 'jsqlparser', version: '4.2'
 
 
-    implementation('info.gratour.common:gratour-common:3.2.7')
-    implementation('com.lucendar.common:server-common:1.0.5')
+    implementation('info.gratour.common:gratour-common:3.2.8')
+    implementation('com.lucendar.common:server-common:1.0.6')
 }
 
 test {
@@ -46,16 +50,16 @@ test {
 
 task sourceJar(type: Jar) {
     from sourceSets.main.allSource
+    archiveClassifier = 'sources'
 }
+
+
 
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-
-            artifact sourceJar {
-                classifier "sources"
-            }
+            artifact sourceJar
         }
     }
 }
