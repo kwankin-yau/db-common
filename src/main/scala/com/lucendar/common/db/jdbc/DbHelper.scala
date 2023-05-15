@@ -7,11 +7,12 @@
  * ***************************************************************************** */
 package com.lucendar.common.db.jdbc
 
+import com.lucendar.common.db.types.SqlDialect
 import com.lucendar.common.db.types.Types.{MultiBinding, MultiSetting}
 import com.lucendar.common.serv.utils.ServUtils
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.springframework.core.io.ResourceLoader
-import org.springframework.jdbc.core.{JdbcTemplate, PreparedStatementSetter, RowMapper}
+import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, PreparedStatementSetter, RowMapper}
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
 import java.sql.{Connection, PreparedStatement, ResultSet}
@@ -105,6 +106,15 @@ object DbHelper {
     val jdbcTemplate = new JdbcTemplate(txMgr.getDataSource)
 
     JdbcContext(txMgr, jdbcTemplate)
+  }
+
+  def tableExists(ds: DataSource, sqlDialect: SqlDialect, tableName: String): Boolean = {
+    val jdbcTemplate = new JdbcTemplate(ds)
+    jdbcTemplate.execute(new ConnectionCallback[Boolean] {
+      override def doInConnection(con: Connection): Boolean = {
+        sqlDialect.tableExists(con, tableName)
+      }
+    })
   }
 
 

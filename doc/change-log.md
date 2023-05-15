@@ -1,3 +1,9 @@
+# 1.0.6 [2023-05-15]
+## Changed
+update build.gradle to adapt to gradle 8.0, upgrade dempendencies
+## Improvement
+- `com.lucendar.common.db.jdbc.DbHelper.tableExists` added
+
 # 1.0.5 [2022-12-11]
 ## Changed
 - Dependencies:
