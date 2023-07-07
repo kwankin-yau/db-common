@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'scala'
     id 'maven-publish'
+//    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 group 'com.lucendar.common'
@@ -18,6 +19,7 @@ targetCompatibility = '11'
 repositories {
     mavenLocal()
     mavenCentral()
+
 }
 
 dependencies {
@@ -56,11 +58,38 @@ task sourceJar(type: Jar) {
 
 
 publishing {
+    repositories {
+        maven {
+            if (project.version.toString().endsWith("-SNAPSHOT")) {
+                name = "snapshotsRepo"
+                url = "https://wx.gratour.info:7999/repository/maven-snapshots/"
+            } else {
+                name = "releasesRepo"
+                url = "https://wx.gratour.info:7999/repository/my-nexus/"
+            }
+
+            credentials {
+                username = "${ossUser}"
+                password = "${ossPwd}"
+            }
+        }
+    }
     publications {
         maven(MavenPublication) {
             from components.java
             artifact sourceJar
         }
+
     }
 }
 
+//nexusPublishing {
+//    repositories {
+//        sonatype {
+//            nexusUrl.set(uri("https://wx.gratour.info:7999/repository/maven-releases/"))
+//            snapshotRepositoryUrl.set(uri("https://wx.gratour.info:7999/repository/maven-snapshots/"))
+//            username = "${ossUser}"
+//            password = "${ossPwd}"
+//        }
+//    }
+//}
