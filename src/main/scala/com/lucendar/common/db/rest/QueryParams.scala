@@ -3,11 +3,10 @@ package com.lucendar.common.db.rest
 import com.lucendar.common.db.rest.QueryParams.HookedMapper
 import com.lucendar.common.db.schema.{FieldConstraint, FieldDataType, FieldNameMapper, FieldResolver, MapperBuilder, PaginationSupportSpec}
 import com.lucendar.common.db.types.{Predication, QueryResult, QueryResultObjectLoader, SqlDialect}
+import com.lucendar.common.types.rest.Pagination
+import com.lucendar.common.utils.{DateTimeUtils, StringUtils}
 import com.typesafe.scalalogging.Logger
 import info.gratour.common.error.{ErrorWithCode, Errors}
-import info.gratour.common.types.rest.Pagination
-import info.gratour.common.types.{EpochMillis, Flag, Sink}
-import info.gratour.common.utils.{DateTimeUtils, StringUtils}
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.schema.Column
 import net.sf.jsqlparser.statement.select.{PlainSelect, Select, SelectExpressionItem}
@@ -16,10 +15,15 @@ import org.springframework.jdbc.core.{JdbcTemplate, PreparedStatementSetter, Res
 import java.lang.reflect.Field
 import java.sql.{PreparedStatement, ResultSet, Timestamp}
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZoneId, ZonedDateTime}
-import java.util.Date
+import java.time.{Instant, LocalDate, LocalDateTime, OffsetDateTime, ZoneId}
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
+
+trait Sink[E <: AnyRef] {
+
+  def offer(e: E): Unit
+  def eof(): Unit
+}
 
 case class SearchConditionOption(notAllowRange: Boolean = false, equalOnly: Boolean = false)
 
@@ -757,41 +761,41 @@ case class ParsedQueryParams[T <: AnyRef](
     conds(0).parsedValues(0)
   }
 
-  def singleCondValueAsEpochMillis(paramName: String): EpochMillis = {
-    val conds = findCondition(paramName)
-    if (conds == null || conds.isEmpty)
-      throw ErrorWithCode.invalidParam(paramName)
-
-    conds(0).parsedValues(0) match {
-      case l: java.lang.Long =>
-        EpochMillis(l.longValue())
-
-      case epochMillis: EpochMillis =>
-        epochMillis
-
-      case ldt: LocalDateTime =>
-        EpochMillis(ldt.toInstant(DateTimeUtils.DEFAULT_ZONE_OFFSET).toEpochMilli)
-
-      case odt: OffsetDateTime =>
-        EpochMillis(odt.toInstant.toEpochMilli)
-
-      case zdt: ZonedDateTime =>
-        EpochMillis(zdt.toInstant.toEpochMilli)
-
-      case dat: Date =>
-        EpochMillis(dat.getTime)
-
-      case s: String =>
-        val odt = StringUtils.tryParseOffsetDateTime(s)
-        if (odt == null)
-          throw ErrorWithCode.invalidParam(paramName)
-
-        EpochMillis(odt.toInstant.toEpochMilli)
-
-      case _ =>
-        throw ErrorWithCode.invalidParam(paramName)
-    }
-  }
+//  def singleCondValueAsEpochMillis(paramName: String): EpochMillis = {
+//    val conds = findCondition(paramName)
+//    if (conds == null || conds.isEmpty)
+//      throw ErrorWithCode.invalidParam(paramName)
+//
+//    conds(0).parsedValues(0) match {
+//      case l: java.lang.Long =>
+//        EpochMillis(l.longValue())
+//
+//      case epochMillis: EpochMillis =>
+//        epochMillis
+//
+//      case ldt: LocalDateTime =>
+//        EpochMillis(ldt.toInstant(DateTimeUtils.DEFAULT_ZONE_OFFSET).toEpochMilli)
+//
+//      case odt: OffsetDateTime =>
+//        EpochMillis(odt.toInstant.toEpochMilli)
+//
+//      case zdt: ZonedDateTime =>
+//        EpochMillis(zdt.toInstant.toEpochMilli)
+//
+//      case dat: Date =>
+//        EpochMillis(dat.getTime)
+//
+//      case s: String =>
+//        val odt = StringUtils.tryParseOffsetDateTime(s)
+//        if (odt == null)
+//          throw ErrorWithCode.invalidParam(paramName)
+//
+//        EpochMillis(odt.toInstant.toEpochMilli)
+//
+//      case _ =>
+//        throw ErrorWithCode.invalidParam(paramName)
+//    }
+//  }
 
   def replaceSelect(newSelect: String): ParsedQueryParams[T] =
     ParsedQueryParams(spec, newSelect, conditions, pagination, sortColumns, fields, groupByClause, sqlDialect)
@@ -821,8 +825,6 @@ case class ParsedQueryParams[T <: AnyRef](
             val v = cond.parsedValues(index) match {
               case l: java.lang.Long =>
                 OffsetDateTime.ofInstant(Instant.ofEpochMilli(l), DateTimeUtils.DEFAULT_ZONE_ID)
-              case ep: EpochMillis =>
-                ep.toOffsetDateTime(DateTimeUtils.DEFAULT_ZONE_ID)
               case odt: OffsetDateTime =>
                 odt
               case _ =>
@@ -950,11 +952,11 @@ case class ParsedQueryParams[T <: AnyRef](
         if (expressions.length == 1)
           where.append(expressions(0))
         else {
-          val flag = Flag(true)
+          var flag = true
           val str = new StringBuilder
           expressions.foreach(expr => {
-            if (flag.value)
-              flag.value = false
+            if (flag)
+              flag = false
             else
               str.append(" OR ")
 
@@ -1078,11 +1080,11 @@ case class ParsedQueryParams[T <: AnyRef](
         if (expressions.length == 1)
           where.append(expressions(0))
         else {
-          val flag = Flag(true)
+          var flag = true
           val str = new StringBuilder
           expressions.foreach(expr => {
-            if (flag.value)
-              flag.value = false
+            if (flag)
+              flag = false
             else
               str.append(" OR ")
 

@@ -4,10 +4,9 @@ import com.lucendar.common.db.jdbc.{SimplePreparedStatementCreator, StatementBin
 import com.lucendar.common.db.rest.{CustomFieldLoaderProvider, QueryParamsSpecBuilder}
 import com.lucendar.common.db.schema.UpsertBuilder.{COLUMN_REF, CURRENT_DATE, CURRENT_TIMESTAMP, DEFAULT, FIELD_STUB, GENERAL, NULL, Value}
 import com.lucendar.common.db.types.SqlDialect
+import com.lucendar.common.utils.CommonUtils
 import com.typesafe.scalalogging.Logger
 import info.gratour.common.error.{ErrorWithCode, Errors}
-import info.gratour.common.types.Flag
-import info.gratour.common.utils.CommonUtils
 import org.springframework.jdbc.core.{BatchPreparedStatementSetter, JdbcTemplate, PreparedStatementSetter, ResultSetExtractor, RowMapper}
 
 import java.io.ByteArrayInputStream
@@ -140,10 +139,10 @@ case class TableSchema(
 
     val str = new StringBuilder
     str.append("DELETE FROM ").append(tableName).append(" WHERE ")
-    val flag = Flag(true)
+    var flag = true
     primaryKeyColumns.foreach(c => {
-      if (flag.value)
-        flag.value = false
+      if (flag)
+        flag = false
       else {
         str.append(" AND ")
       }
@@ -469,22 +468,22 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
 
   private def generateInsert(str: StringBuilder, parameters: ArrayBuffer[Value]): Unit = {
     str.append("INSERT INTO ").append(tableSchema.tableName).append('(')
-    val flag = Flag(true)
+    var flag = true
     for (c <- tableSchema.columns) {
       if (c.columnKind.isPersisted) {
-        if (flag.value)
-          flag.value = false
+        if (flag)
+          flag = false
         else str.append(", ")
 
         str.append(c.columnName)
       }
     }
     str.append(") VALUES (")
-    flag.value = true
+    flag = true
     for (c <- tableSchema.columns) {
       if (c.columnKind.isPersisted) {
-        if (flag.value)
-          flag.value = false
+        if (flag)
+          flag = false
         else str.append(", ")
 
         val value = findInsertValue(c.columnName)
@@ -520,16 +519,16 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
   private def generateOnConflictUpdate(str: StringBuilder, parameters: ArrayBuffer[Value]): Unit = {
     tableSchema.checkPrimaryKey()
 
-    val flag = Flag(true)
+    var flag = true
     tableSchema.columns.foreach(c => {
       if (!isUpdateExcluded(c.columnName) && c.columnKind.isPersisted) {
-        if (flag.value) {
-          flag.value = false
+        if (flag) {
+          flag = false
           str.append(" ON CONFLICT(")
-          val flag2 = Flag(true)
+          var flag2 = true
           tableSchema.primaryKeyColumns.foreach(c => {
-            if (flag2.value)
-              flag2.value = false
+            if (flag2)
+              flag2 = false
             else
               str.append(", ")
 
@@ -563,13 +562,13 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
   }
 
   private def generateReturning(str: StringBuilder): Unit = {
-    val flag = Flag(true)
+    var flag = true
 
     if (definedReturningColumns == null) {
       tableSchema.columns.foreach(columnDef => {
         if (columnDef.columnKind.isPersisted) {
-          if (flag.value) {
-            flag.value = false
+          if (flag) {
+            flag = false
 
             str.append(" RETURNING ")
           } else
@@ -595,8 +594,8 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
 //      }
     } else {
       for (columnName <- definedReturningColumns) {
-        if (flag.value) {
-          flag.value = false
+        if (flag) {
+          flag = false
 
           str.append(" RETURNING ")
         }
@@ -610,11 +609,11 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
 
   private def generateUpdate(str: StringBuilder, parameters: ArrayBuffer[Value]): Unit = {
     str.append("UPDATE ").append(tableSchema.tableName).append(" SET ")
-    val flag = Flag(true)
+    var flag = true
     for (c <- tableSchema.columns) {
       if (!isUpdateExcluded(c.columnName) && c.columnKind != ColumnKind.PRIMARY_KEY && c.columnKind.isPersisted) {
-        if (flag.value)
-          flag.value = false
+        if (flag)
+          flag = false
         else str.append(", ")
 
         str.append(c.columnName).append(" = ")
@@ -644,11 +643,11 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
     }
 
     str.append(" WHERE ")
-    flag.value = true
+    flag = true
     for (c <- tableSchema.columns) {
       if (c.columnKind == ColumnKind.PRIMARY_KEY) {
-        if (flag.value)
-          flag.value = false
+        if (flag)
+          flag = false
         else str.append(" AND ")
 
         val fieldName = tableSchema.fieldNameMapper.toApiFieldName(c.columnName)
@@ -663,7 +662,7 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
 
   private def generateDynamicUpdate(entry: T, str: StringBuilder, parameters: ArrayBuffer[Value]): Unit = {
     str.append("UPDATE ").append(tableSchema.tableName).append(" SET ")
-    val flag = Flag(true)
+    var flag = true
     for (c <- tableSchema.columns) {
       if (c.columnKind != ColumnKind.PRIMARY_KEY && c.columnKind.isPersisted) {
         val fieldName = tableSchema.fieldNameMapper.toApiFieldName(c.columnName)
@@ -672,8 +671,8 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
           field.setAccessible(true)
           val v = field.get(entry)
           if (v != null) {
-            if (flag.value)
-              flag.value = false
+            if (flag)
+              flag = false
             else str.append(", ")
 
             str.append(c.columnName).append(" = ?")
@@ -685,11 +684,11 @@ class UpsertBuilder[T >: Null <: AnyRef](val tableSchema: TableSchema, val field
     }
 
     str.append(" WHERE ")
-    flag.value = true
+    flag = true
     for (c <- tableSchema.columns) {
       if (c.columnKind == ColumnKind.PRIMARY_KEY) {
-        if (flag.value)
-          flag.value = false
+        if (flag)
+          flag = false
         else str.append(" AND ")
 
         val fieldName = tableSchema.fieldNameMapper.toApiFieldName(c.columnName)

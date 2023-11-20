@@ -1,6 +1,15 @@
+# 1.1.0 [2023-10-25]
+## Improvement
+- `com.lucendar.common.db.jdbc.StatementBinder.setShortUseInteger` added
+- Upgrade JVM version to 17
+- Upgrade to spring 6
+## Fixed
+- `com.lucendar.common.db.jdbc.StatementBinder.setBytes` direct use PreparedStatement.setBytes() method instead of 
+  setBinaryStream because sqlite does not support this method.
+
 # 1.0.6 [2023-05-15]
 ## Changed
-update build.gradle to adapt to gradle 8.0, upgrade dempendencies
+update build.gradle to adapt to gradle 8.0, upgrade dependencies
 ## Improvement
 - `com.lucendar.common.db.jdbc.DbHelper.tableExists` added
 

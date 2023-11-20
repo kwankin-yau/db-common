@@ -7,9 +7,9 @@
  * ***************************************************************************** */
 package com.lucendar.common.db.types
 
-import java.util
-import info.gratour.common.types.rest.{Reply, SingleReply}
+import info.gratour.common.types.rest.Reply
 
+import java.util
 import scala.reflect.ClassTag
 
 case class QueryResult[T <: Object](dataArray: Array[T], totalRecordCount: Long) {
@@ -42,10 +42,6 @@ case class QueryResult[T <: Object](dataArray: Array[T], totalRecordCount: Long)
     if (dataArray != null)
       dataArray.foreach(t => r.add(t))
     r
-  }
-
-  def toSingleReply: SingleReply[T] = {
-    new SingleReply[T](firstOrNull)
   }
 
   def isEmpty: Boolean = dataArray == null || dataArray.isEmpty

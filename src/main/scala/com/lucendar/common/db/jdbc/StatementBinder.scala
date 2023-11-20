@@ -1,12 +1,11 @@
 package com.lucendar.common.db.jdbc
 
+import com.google.gson.Gson
 import com.lucendar.common.db.schema.FieldDataType
+import com.lucendar.common.db.types.Reflections
+import com.lucendar.common.utils.DateTimeUtils
 import com.typesafe.scalalogging.Logger
-import info.gratour.common.Consts
 import info.gratour.common.error.{ErrorWithCode, Errors}
-import info.gratour.common.lang.Reflections
-import info.gratour.common.types.{EpochMillis, IncIndex}
-import info.gratour.common.utils.DateTimeUtils
 import org.springframework.jdbc.core.PreparedStatementSetter
 
 import java.io.ByteArrayInputStream
@@ -17,19 +16,23 @@ class StatementBinder(val st: PreparedStatement) {
 
   import StatementBinder.logger
 
-  val idx: IncIndex = IncIndex()
+  var idx = 0
 
   def restart(): StatementBinder = {
-    idx.index = 0
+    idx = 0
     this
   }
 
-  def setNull(sqlType: Int): Unit =
-    st.setNull(idx.inc(), sqlType)
+  def setNull(sqlType: Int): Unit = {
+    idx += 1
+    st.setNull(idx, sqlType)
+  }
 
 
-  def setBool(value: Boolean): Unit =
-    st.setBoolean(idx.inc(), value)
+  def setBool(value: Boolean): Unit = {
+    idx += 1
+    st.setBoolean(idx, value)
+  }
 
   def setBoolObject(value: java.lang.Boolean): Unit =
     if (value != null)
@@ -40,12 +43,16 @@ class StatementBinder(val st: PreparedStatement) {
   def setBoolOpt(value: Option[Boolean]): Unit =
     if (value.isDefined)
       setBool(value.get)
-    else
-      st.setNull(idx.inc(), Types.BOOLEAN)
+    else {
+      idx += 1
+      st.setNull(idx, Types.BOOLEAN)
+    }
 
 
-  def setShort(value: Short): Unit =
-    st.setShort(idx.inc(), value)
+  def setShort(value: Short): Unit = {
+    idx += 1
+    st.setShort(idx, value)
+  }
 
   def setShortObject(value: java.lang.Short): Unit =
     if (value != null)
@@ -53,15 +60,25 @@ class StatementBinder(val st: PreparedStatement) {
     else
       setNull(Types.SMALLINT)
 
+  def setShortUseInteger(value: java.lang.Integer): Unit =
+    if (value != null)
+      setShort(value.shortValue())
+    else
+      setNull(Types.SMALLINT)
+
   def setShortOpt(value: Option[Short]): Unit =
     if (value.isDefined)
       setShort(value.get)
-    else
-      st.setNull(idx.inc(), Types.SMALLINT)
+    else {
+      idx += 1
+      st.setNull(idx, Types.SMALLINT)
+    }
 
 
-  def setInt(value: Int): Unit =
-    st.setInt(idx.inc(), value)
+  def setInt(value: Int): Unit = {
+    idx += 1
+    st.setInt(idx, value)
+  }
 
   def setIntObject(value: java.lang.Integer): Unit =
     if (value != null)
@@ -76,8 +93,10 @@ class StatementBinder(val st: PreparedStatement) {
       setNull(Types.INTEGER)
 
 
-  def setLong(value: Long): Unit =
-    st.setLong(idx.inc(), value)
+  def setLong(value: Long): Unit = {
+    idx += 1
+    st.setLong(idx, value)
+  }
 
   def setLongObject(value: java.lang.Long): Unit =
     if (value != null)
@@ -92,8 +111,10 @@ class StatementBinder(val st: PreparedStatement) {
       setNull(Types.BIGINT)
 
 
-  def setSingle(value: Float): Unit =
-    st.setFloat(idx.inc(), value)
+  def setSingle(value: Float): Unit = {
+    idx += 1
+    st.setFloat(idx, value)
+  }
 
   def setSingleObject(value: java.lang.Float): Unit =
     if (value != null)
@@ -108,8 +129,10 @@ class StatementBinder(val st: PreparedStatement) {
       setNull(Types.FLOAT)
 
 
-  def setDouble(value: Double): Unit =
-    st.setDouble(idx.inc(), value)
+  def setDouble(value: Double): Unit = {
+    idx += 1
+    st.setDouble(idx, value)
+  }
 
   def setDoubleObject(value: java.lang.Double): Unit =
     if (value != null)
@@ -124,34 +147,42 @@ class StatementBinder(val st: PreparedStatement) {
       setNull(Types.DOUBLE)
 
 
-  def setDecimal(value: java.math.BigDecimal): Unit =
-    st.setBigDecimal(idx.inc(), value)
+  def setDecimal(value: java.math.BigDecimal): Unit = {
+    idx += 1
+    st.setBigDecimal(idx, value)
+  }
 
-  def setString(value: String): Unit =
-    st.setString(idx.inc(), value)
+  def setString(value: String): Unit = {
+    idx += 1
+    st.setString(idx, value)
+  }
 
   def setLocalDate(value: LocalDate): Unit =
-    if (value != null)
-      st.setObject(idx.inc(), value)
-    else
+    if (value != null) {
+      idx += 1
+      st.setObject(idx, value)
+    } else
       setNull(Types.DATE)
 
   def setLocalTime(value: LocalTime): Unit =
-    if (value != null)
-      st.setObject(idx.inc(), value)
-    else
+    if (value != null) {
+      idx += 1
+      st.setObject(idx, value)
+    } else
       setNull(Types.TIME)
 
   def setOffsetDateTime(value: OffsetDateTime): Unit =
-    if (value != null)
-      st.setObject(idx.inc(), value)
-    else
+    if (value != null) {
+      idx += 1
+      st.setObject(idx, value)
+    } else
       setNull(Types.TIMESTAMP_WITH_TIMEZONE)
 
   def setTimestamp(value: Timestamp): Unit =
-    if (value != null)
-      st.setTimestamp(idx.inc(), value)
-    else
+    if (value != null) {
+      idx += 1
+      st.setTimestamp(idx, value)
+    } else
       setNull(Types.TIMESTAMP_WITH_TIMEZONE)
 
   def setTimestamp(epochMillis: java.lang.Long): Unit =
@@ -166,44 +197,38 @@ class StatementBinder(val st: PreparedStatement) {
     else
       setNull(Types.TIMESTAMP_WITH_TIMEZONE)
 
-  def setEpochMillis(epochMillis: EpochMillis): Unit =
-    if (epochMillis != null)
-      setOffsetDateTime(epochMillis)
-    else
-      setNull(Types.TIMESTAMP_WITH_TIMEZONE)
-
   def setBinaryStream(stream: java.io.InputStream): Unit =
-    if (stream != null)
-      st.setBinaryStream(idx.inc(), stream)
-    else
+    if (stream != null) {
+      idx += 1
+      st.setBinaryStream(idx, stream)
+    } else
       setNull(Types.BINARY)
 
   def setBinaryStream(stream: java.io.InputStream, length: Long): Unit =
-    if (stream != null)
-      st.setBinaryStream(idx.inc(), stream, length)
-    else
+    if (stream != null) {
+      idx += 1
+      st.setBinaryStream(idx, stream, length)
+    } else
       setNull(Types.BINARY)
 
   def setBytes(bytes: Array[Byte], offset: Int, length: Int): Unit = {
-    val in = new ByteArrayInputStream(bytes, offset, length)
-    try {
-      st.setBinaryStream(idx.inc(), in)
-    } finally {
-      in.close()
-    }
+      idx += 1
+      st.setBytes(idx, bytes.slice(offset, offset + length));
   }
 
   def setBytes(bytes: Array[Byte]): Unit = {
-    if (bytes != null)
-      setBytes(bytes, 0, bytes.length)
-    else
+    if (bytes != null) {
+      idx += 1
+      st.setBytes(idx, bytes)
+    } else
       setNull(Types.BINARY)
   }
 
   def setIntArray(intArray: Array[Int]): Unit = {
     if (intArray != null) {
       val arr = st.getConnection.createArrayOf("INTEGER", intArray.map(Integer.valueOf))
-      st.setArray(idx.inc(), arr)
+      idx += 1
+      st.setArray(idx, arr)
     } else
       setNull(Types.ARRAY)
   }
@@ -246,7 +271,7 @@ class StatementBinder(val st: PreparedStatement) {
       case Reflections.JLocalDateTime =>
         setNull(Types.TIMESTAMP)
 
-      case Reflections.JOffsetDateTime | Reflections.JEpochMillis =>
+      case Reflections.JOffsetDateTime =>
         setNull(Types.TIMESTAMP_WITH_TIMEZONE)
 
       case Reflections.JByteArray =>
@@ -322,8 +347,6 @@ class StatementBinder(val st: PreparedStatement) {
         setLocalTime(localTime)
       case offsetDateTime: OffsetDateTime =>
         setOffsetDateTime(offsetDateTime)
-      case epochMillis: EpochMillis =>
-        setEpochMillis(epochMillis)
 
       case jbool: java.lang.Boolean =>
         if (jbool != null)
@@ -383,42 +406,42 @@ class StatementBinder(val st: PreparedStatement) {
         tag.tpe match {
           case TypeRef(_, _, args) =>
             val optArgType = args.head
-            if (optArgType =:= info.gratour.common.Types.BoolType) {
+            if (optArgType =:= com.lucendar.common.db.types.Types.BoolType) {
               if (opt.isDefined)
                 setBool(opt.get.asInstanceOf[Boolean])
               else
                 setNull(Types.BOOLEAN)
-            } else if (optArgType =:= info.gratour.common.Types.ByteType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.ByteType) {
               if (opt.isDefined)
                 setShort(opt.get.asInstanceOf[Byte])
               else
                 setNull(Types.SMALLINT)
-            } else if (optArgType =:= info.gratour.common.Types.ShortType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.ShortType) {
               if (opt.isDefined)
                 setShort(opt.get.asInstanceOf[Short])
               else
                 setNull(Types.SMALLINT)
-            } else if (optArgType =:= info.gratour.common.Types.IntType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.IntType) {
               if (opt.isDefined)
                 setInt(opt.get.asInstanceOf[Int])
               else
                 setNull(Types.INTEGER)
-            } else if (optArgType =:= info.gratour.common.Types.LongType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.LongType) {
               if (opt.isDefined)
                 setLong(opt.get.asInstanceOf[Long])
               else
                 setNull(Types.BIGINT)
-            } else if (optArgType =:= info.gratour.common.Types.FloatType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.FloatType) {
               if (opt.isDefined)
                 setSingle(opt.get.asInstanceOf[Float])
               else
                 setNull(Types.FLOAT)
-            } else if (optArgType =:= info.gratour.common.Types.DoubleType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.DoubleType) {
               if (opt.isDefined)
                 setDouble(opt.get.asInstanceOf[Double])
               else
                 setNull(Types.DOUBLE)
-            } else if (optArgType =:= info.gratour.common.Types.InputStreamType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.InputStreamType) {
               if (opt.isDefined)
                 setBinaryStream(opt.get.asInstanceOf[java.io.InputStream])
               else
@@ -431,33 +454,31 @@ class StatementBinder(val st: PreparedStatement) {
       case _ =>
         val tpe = tag.tpe
 
-        if (tpe =:= info.gratour.common.Types.StringType)
+        if (tpe =:= com.lucendar.common.db.types.Types.StringType)
           setNull(Types.VARCHAR)
-        else if (tpe =:= info.gratour.common.Types.LocalDateType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.LocalDateType)
           setNull(Types.DATE)
-        else if (tpe =:= info.gratour.common.Types.LocalTimeType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.LocalTimeType)
           setNull(Types.TIME)
-        else if (tpe =:= info.gratour.common.Types.OffsetDateTimeType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.OffsetDateTimeType)
           setNull(Types.TIMESTAMP_WITH_TIMEZONE)
-        else if (tpe =:= info.gratour.common.Types.EpochMillisType)
-          setNull(Types.TIMESTAMP_WITH_TIMEZONE)
-        else if (tpe =:= info.gratour.common.Types.JBigDecimalType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JBigDecimalType)
           setNull(Types.DECIMAL)
-        else if (tpe =:= info.gratour.common.Types.JCharacterType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JCharacterType)
           setNull(Types.CHAR)
-        else if (tpe =:= info.gratour.common.Types.JBooleanType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JBooleanType)
           setNull(Types.BOOLEAN)
-        else if (tpe =:= info.gratour.common.Types.JIntegerType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JIntegerType)
           setNull(Types.INTEGER)
-        else if (tpe =:= info.gratour.common.Types.JShortType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JShortType)
           setNull(Types.SMALLINT)
-        else if (tpe =:= info.gratour.common.Types.JByteType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JByteType)
           setNull(Types.SMALLINT)
-        else if (tpe =:= info.gratour.common.Types.JFloatType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JFloatType)
           setNull(Types.FLOAT)
-        else if (tpe =:= info.gratour.common.Types.JDoubleType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JDoubleType)
           setNull(Types.DOUBLE)
-        else if (tpe =:= info.gratour.common.Types.InputStreamType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.InputStreamType)
           setNull(Types.BINARY)
         else {
           if (fieldDataType == FieldDataType.TEXT) {
@@ -496,8 +517,6 @@ class StatementBinder(val st: PreparedStatement) {
         setLocalTime(localTime)
       case offsetDateTime: OffsetDateTime =>
         setOffsetDateTime(offsetDateTime)
-      case epochMillis: EpochMillis =>
-        setEpochMillis(epochMillis)
 
       case jbool: java.lang.Boolean =>
         if (jbool != null)
@@ -550,42 +569,42 @@ class StatementBinder(val st: PreparedStatement) {
         tag.tpe match {
           case TypeRef(_, _, args) =>
             val optArgType = args.head
-            if (optArgType =:= info.gratour.common.Types.BoolType) {
+            if (optArgType =:= com.lucendar.common.db.types.Types.BoolType) {
               if (opt.isDefined)
                 setBool(opt.get.asInstanceOf[Boolean])
               else
                 setNull(Types.BOOLEAN)
-            } else if (optArgType =:= info.gratour.common.Types.ByteType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.ByteType) {
               if (opt.isDefined)
                 setShort(opt.get.asInstanceOf[Byte])
               else
                 setNull(Types.SMALLINT)
-            } else if (optArgType =:= info.gratour.common.Types.ShortType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.ShortType) {
               if (opt.isDefined)
                 setShort(opt.get.asInstanceOf[Short])
               else
                 setNull(Types.SMALLINT)
-            } else if (optArgType =:= info.gratour.common.Types.IntType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.IntType) {
               if (opt.isDefined)
                 setInt(opt.get.asInstanceOf[Int])
               else
                 setNull(Types.INTEGER)
-            } else if (optArgType =:= info.gratour.common.Types.LongType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.LongType) {
               if (opt.isDefined)
                 setLong(opt.get.asInstanceOf[Long])
               else
                 setNull(Types.BIGINT)
-            } else if (optArgType =:= info.gratour.common.Types.FloatType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.FloatType) {
               if (opt.isDefined)
                 setSingle(opt.get.asInstanceOf[Float])
               else
                 setNull(Types.FLOAT)
-            } else if (optArgType =:= info.gratour.common.Types.DoubleType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.DoubleType) {
               if (opt.isDefined)
                 setDouble(opt.get.asInstanceOf[Double])
               else
                 setNull(Types.DOUBLE)
-            } else if (optArgType =:= info.gratour.common.Types.InputStreamType) {
+            } else if (optArgType =:= com.lucendar.common.db.types.Types.InputStreamType) {
               if (opt.isDefined)
                 setBinaryStream(opt.get.asInstanceOf[java.io.InputStream])
               else
@@ -598,33 +617,31 @@ class StatementBinder(val st: PreparedStatement) {
       case _ =>
         val tpe = tag.tpe
 
-        if (tpe =:= info.gratour.common.Types.StringType)
+        if (tpe =:= com.lucendar.common.db.types.Types.StringType)
           setNull(Types.VARCHAR)
-        else if (tpe =:= info.gratour.common.Types.LocalDateType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.LocalDateType)
           setNull(Types.DATE)
-        else if (tpe =:= info.gratour.common.Types.LocalTimeType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.LocalTimeType)
           setNull(Types.TIME)
-        else if (tpe =:= info.gratour.common.Types.OffsetDateTimeType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.OffsetDateTimeType)
           setNull(Types.TIMESTAMP_WITH_TIMEZONE)
-        else if (tpe =:= info.gratour.common.Types.EpochMillisType)
-          setNull(Types.TIMESTAMP_WITH_TIMEZONE)
-        else if (tpe =:= info.gratour.common.Types.JBigDecimalType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JBigDecimalType)
           setNull(Types.DECIMAL)
-        else if (tpe =:= info.gratour.common.Types.JCharacterType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JCharacterType)
           setNull(Types.CHAR)
-        else if (tpe =:= info.gratour.common.Types.JBooleanType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JBooleanType)
           setNull(Types.BOOLEAN)
-        else if (tpe =:= info.gratour.common.Types.JIntegerType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JIntegerType)
           setNull(Types.INTEGER)
-        else if (tpe =:= info.gratour.common.Types.JShortType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JShortType)
           setNull(Types.SMALLINT)
-        else if (tpe =:= info.gratour.common.Types.JByteType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JByteType)
           setNull(Types.SMALLINT)
-        else if (tpe =:= info.gratour.common.Types.JFloatType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JFloatType)
           setNull(Types.FLOAT)
-        else if (tpe =:= info.gratour.common.Types.JDoubleType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.JDoubleType)
           setNull(Types.DOUBLE)
-        else if (tpe =:= info.gratour.common.Types.InputStreamType)
+        else if (tpe =:= com.lucendar.common.db.types.Types.InputStreamType)
           setNull(Types.BINARY)
         else
           throw new ErrorWithCode(Errors.UNSUPPORTED_TYPE)
@@ -634,9 +651,9 @@ class StatementBinder(val st: PreparedStatement) {
   def bind(values: Any*): Unit = macro StatementBinderMarcos.bind_impl
 
 
-  def json(value: AnyRef): Unit = {
+  def json(gson: Gson, value: AnyRef): Unit = {
     if (value != null)
-      setString(Consts.GSON.toJson(value))
+      setString(gson.toJson(value))
     else
       setNull(Types.VARCHAR)
   }
@@ -650,8 +667,10 @@ object StatementBinder {
 
 class CallableStmtBinder(override val st: CallableStatement) extends StatementBinder(st) {
 
-  def registerOutParameter(sqlType: Int): Unit =
-    st.asInstanceOf[CallableStatement].registerOutParameter(idx.inc(), sqlType)
+  def registerOutParameter(sqlType: Int): Unit = {
+    idx += 1
+    st.asInstanceOf[CallableStatement].registerOutParameter(idx, sqlType)
+  }
 
   def getBool(colIndex: Int): Boolean =
     st.getBoolean(colIndex)

@@ -2,8 +2,7 @@ package com.lucendar.common.db.jdbc
 
 
 import com.google.gson.{Gson, GsonBuilder}
-import info.gratour.common.types.{EpochMillis, IncIndex}
-import info.gratour.common.utils.DateTimeUtils
+import com.lucendar.common.utils.DateTimeUtils
 import org.springframework.jdbc.core.RowMapper
 
 import java.sql.{ResultSet, SQLException, Timestamp}
@@ -13,7 +12,7 @@ class ResultSetAccessor(val resultSet: ResultSet) {
 
   var rs: ResultSet = resultSet
 
-  val colIndex: IncIndex = IncIndex()
+  var colIndex: Int = 0
 
   def next(): Boolean = {
     val r = rs.next()
@@ -23,26 +22,29 @@ class ResultSetAccessor(val resultSet: ResultSet) {
     r
   }
 
-  def reset(): Unit = colIndex.index = 0
+  def reset(): Unit = colIndex = 0
 
   def reset(resultSet: ResultSet): ResultSetAccessor = {
     rs = resultSet
-    colIndex.index = 0
+    colIndex = 0
     this
   }
 
   def wasNull: Boolean = rs.wasNull()
 
   def str(): String = {
-    rs.getString(colIndex.inc())
+    colIndex += 1
+    rs.getString(colIndex)
   }
 
   def small(): Short = {
-    rs.getShort(colIndex.inc())
+    colIndex += 1
+    rs.getShort(colIndex)
   }
 
   def smallObj(): java.lang.Short = {
-    val r = rs.getShort(colIndex.inc())
+    colIndex += 1
+    val r = rs.getShort(colIndex)
     if (rs.wasNull())
       null
     else
@@ -50,7 +52,8 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def smallOpt(): Option[Short] = {
-    val r = rs.getShort(colIndex.inc())
+    colIndex += 1
+    val r = rs.getShort(colIndex)
     if (rs.wasNull())
       None
     else
@@ -58,11 +61,13 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def int(): Int = {
-    rs.getInt(colIndex.inc())
+    colIndex += 1
+    rs.getInt(colIndex)
   }
 
   def intObj(): Integer = {
-    val r = rs.getInt(colIndex.inc())
+    colIndex += 1
+    val r = rs.getInt(colIndex)
     if (rs.wasNull())
       null
     else
@@ -70,7 +75,8 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def intOpt(): Option[Int] = {
-    val r = rs.getInt(colIndex.inc())
+    colIndex += 1
+    val r = rs.getInt(colIndex)
     if (rs.wasNull())
       None
     else
@@ -78,11 +84,13 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def long(): Long = {
-    rs.getLong(colIndex.inc())
+    colIndex += 1
+    rs.getLong(colIndex)
   }
 
   def longObj(): java.lang.Long = {
-    val r = rs.getLong(colIndex.inc())
+    colIndex += 1
+    val r = rs.getLong(colIndex)
     if (rs.wasNull())
       null
     else
@@ -90,18 +98,22 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def longOpt(): Option[Long] = {
-    val r = rs.getLong(colIndex.inc())
+    colIndex += 1
+    val r = rs.getLong(colIndex)
     if (rs.wasNull())
       None
     else
       Some(r)
   }
 
-  def bool(): Boolean =
-    rs.getBoolean(colIndex.inc())
+  def bool(): Boolean = {
+    colIndex += 1
+    rs.getBoolean(colIndex)
+  }
 
   def boolObj(): java.lang.Boolean = {
-    val r = rs.getBoolean(colIndex.inc())
+    colIndex += 1
+    val r = rs.getBoolean(colIndex)
     if (rs.wasNull())
       null
     else
@@ -110,18 +122,22 @@ class ResultSetAccessor(val resultSet: ResultSet) {
 
 
   def boolOpt(): Option[Boolean] = {
-    val r = rs.getBoolean(colIndex.inc())
+    colIndex += 1
+    val r = rs.getBoolean(colIndex)
     if (rs.wasNull())
       None
     else
       Some(r)
   }
 
-  def single(): Float =
-    rs.getFloat(colIndex.inc())
+  def single(): Float = {
+    colIndex += 1
+    rs.getFloat(colIndex)
+  }
 
   def singleObj(): java.lang.Float = {
-    val r = rs.getFloat(colIndex.inc())
+    colIndex += 1
+    val r = rs.getFloat(colIndex)
     if (rs.wasNull())
       null
     else
@@ -129,18 +145,22 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def singleOpt(): Option[Float] = {
-    val r = rs.getFloat(colIndex.inc())
+    colIndex += 1
+    val r = rs.getFloat(colIndex)
     if (rs.wasNull())
       None
     else
       Some(r)
   }
 
-  def double(): Double =
-    rs.getDouble(colIndex.inc())
+  def double(): Double = {
+    colIndex += 1
+    rs.getDouble(colIndex)
+  }
 
   def doubleObj(): java.lang.Double = {
-    val r = rs.getDouble(colIndex.inc())
+    colIndex += 1
+    val r = rs.getDouble(colIndex)
     if (rs.wasNull())
       null
     else
@@ -148,24 +168,33 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def doubleOpt(): Option[Double] = {
-    val r = rs.getDouble(colIndex.inc())
+    colIndex += 1
+    val r = rs.getDouble(colIndex)
     if (rs.wasNull())
       None
     else
       Some(r)
   }
 
-  def decimal(): java.math.BigDecimal =
-    rs.getBigDecimal(colIndex.inc())
+  def decimal(): java.math.BigDecimal = {
+    colIndex += 1
+    rs.getBigDecimal(colIndex)
+  }
 
-  def localDate(): LocalDate =
-    rs.getObject(colIndex.inc(), classOf[LocalDate])
+  def localDate(): LocalDate = {
+    colIndex += 1
+    rs.getObject(colIndex, classOf[LocalDate])
+  }
 
-  def localTime(): LocalTime =
-    rs.getObject(colIndex.inc(), classOf[LocalTime])
+  def localTime(): LocalTime = {
+    colIndex += 1
+    rs.getObject(colIndex, classOf[LocalTime])
+  }
 
-  def offsetDateTime(): OffsetDateTime =
-    rs.getObject(colIndex.inc(), classOf[OffsetDateTime])
+  def offsetDateTime(): OffsetDateTime = {
+    colIndex += 1
+    rs.getObject(colIndex, classOf[OffsetDateTime])
+  }
 
   def localDateTime(zoneId: ZoneId): LocalDateTime = {
     if (zoneId != null) {
@@ -174,12 +203,16 @@ class ResultSetAccessor(val resultSet: ResultSet) {
         odt.atZoneSameInstant(zoneId).toLocalDateTime
       } else
         null
-    } else
-      rs.getObject(colIndex.inc(), classOf[LocalDateTime])
+    } else {
+      colIndex += 1
+      rs.getObject(colIndex, classOf[LocalDateTime])
+    }
   }
 
-  def localDateTime(): LocalDateTime =
-    rs.getObject(colIndex.inc(), classOf[LocalDateTime])
+  def localDateTime(): LocalDateTime = {
+    colIndex += 1
+    rs.getObject(colIndex, classOf[LocalDateTime])
+  }
 
   /**
    * Get current OffsetDateTime value and convert to convenient date time format using given `zoneId` if available.
@@ -207,16 +240,9 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   def convenientDateTimeStr(): String = convenientDateTimeStr(null)
 
 
-  def epochMillis(): EpochMillis = {
-    val r = rs.getObject(colIndex.inc(), classOf[Timestamp])
-    if (rs.wasNull())
-      null
-    else
-      EpochMillis(r.getTime)
-  }
-
   def epochMillisLong(): Long = {
-    val r = rs.getObject(colIndex.inc(), classOf[Timestamp])
+    colIndex += 1
+    val r = rs.getObject(colIndex, classOf[Timestamp])
     if (rs.wasNull())
       throw new SQLException("Can not convert `NULL` to Epoch milli-seconds.")
     else
@@ -224,7 +250,8 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def epochMillisLongObj(): java.lang.Long = {
-    val r = rs.getObject(colIndex.inc(), classOf[Timestamp])
+    colIndex += 1
+    val r = rs.getObject(colIndex, classOf[Timestamp])
     if (rs.wasNull())
       null
     else
@@ -232,7 +259,8 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def json[T >: AnyRef]()(implicit m: Manifest[T]): T = {
-    val s = rs.getString(colIndex.inc())
+    colIndex += 1
+    val s = rs.getString(colIndex)
     if (rs.wasNull())
       null
     else
@@ -240,7 +268,8 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def byteArray(): Array[Byte] = {
-    val str = rs.getBinaryStream(colIndex.inc())
+    colIndex += 1
+    val str = rs.getBinaryStream(colIndex)
     if (rs.wasNull())
       null
     else
@@ -248,7 +277,8 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   }
 
   def intArray(): Array[Int] = {
-    val arr = rs.getArray(colIndex.inc())
+    colIndex += 1
+    val arr = rs.getArray(colIndex)
     if (rs.wasNull())
       null
     else

@@ -1,12 +1,10 @@
 package com.lucendar.common.db.schema
 
 import com.lucendar.common.db.rest.CustomFieldLoaderProvider
-import com.lucendar.common.db.types.QueryResultObjectLoader
+import com.lucendar.common.db.types.{QueryResultObjectLoader, Reflections}
+import com.lucendar.common.utils.CommonUtils
 import com.typesafe.scalalogging.Logger
 import info.gratour.common.error.ErrorWithCode
-import info.gratour.common.lang.Reflections
-import info.gratour.common.types.EpochMillis
-import info.gratour.common.utils.CommonUtils
 import net.sf.jsqlparser.parser.CCJSqlParserUtil
 import net.sf.jsqlparser.schema.{Column, Table}
 import net.sf.jsqlparser.statement.select.{PlainSelect, Select, SelectExpressionItem, TableFunction}
@@ -242,13 +240,6 @@ object MapperBuilder {
                 }
               }
 
-            case Reflections.JEpochMillis =>
-              (t, f, rs) => {
-                val dt = rs.getObject(columnIndex, classOf[OffsetDateTime])
-                val epochMillis = EpochMillis(dt)
-                f.set(t, epochMillis)
-              }
-
             case _ =>
               (t, f, rs) => {
                 if (customFieldLoaderProvider != null) {
@@ -438,13 +429,6 @@ object MapperBuilder {
                   val intArray: Array[Int] = arr.getArray().asInstanceOf[Array[Integer]].map(_.intValue())
                   f.set(t, intArray)
                 }
-              }
-
-            case Reflections.JEpochMillis =>
-              (t, f, rs) => {
-                val dt = rs.getObject(columnIndex, classOf[OffsetDateTime])
-                val epochMillis = EpochMillis(dt)
-                f.set(t, epochMillis)
               }
 
             case _ =>

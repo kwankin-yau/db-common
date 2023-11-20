@@ -15,6 +15,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
 import java.sql.Connection
 import java.util
+import scala.util.Using
 
 trait DbSupport {
 
@@ -40,7 +41,6 @@ trait DbSupport {
         throw t
     }
   }
-
 
   protected def inTransRequired[T](op: () => T): T = tx(op)
 

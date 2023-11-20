@@ -15,7 +15,9 @@ import org.springframework.core.io.ResourceLoader
 import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, PreparedStatementSetter, RowMapper}
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
+import java.io.Closeable
 import java.sql.{Connection, PreparedStatement, ResultSet}
+import java.time.OffsetDateTime
 import java.{lang, util}
 import java.util.Properties
 import javax.sql.DataSource
@@ -25,7 +27,7 @@ import scala.util.Using
 object DbHelper {
 
   final val DEFAULT_MAX_POOL_SIZE = 20
-  final val DEFAULT_LEAK_DETECTION_THRESHOLD_SECONDS = 20*60
+  final val DEFAULT_LEAK_DETECTION_THRESHOLD_SECONDS = 20 * 60
 
   /**
    * Create a HikariDataSource from given arguments.
@@ -38,11 +40,12 @@ object DbHelper {
    * @return data source
    */
   def createDataSource(
-                        jdbcUrl: String,
-                        username: String,
-                        password: String,
-                        maxPoolSize: Int,
-                        leakDetectionThresholdSeconds: Int): DataSource = {
+                        jdbcUrl                      : String,
+                        username                     : String,
+                        password                     : String,
+                        maxPoolSize                  : Int,
+                        leakDetectionThresholdSeconds: Int
+                      ): DataSource = {
     val hc = new HikariConfig()
     hc.setJdbcUrl(jdbcUrl)
 
@@ -64,21 +67,33 @@ object DbHelper {
   /**
    * Create a HikariDataSource from given arguments.
    *
-   * @param jdbcUrl                       jdbc url for data source
-   * @param username                      database username, optional
-   * @param password                      database password, optional
-   * @param maxPoolSize                   maximum pool size, 0 for not specified
-   * @param leakDetectionThresholdSeconds time in seconds that it is a period of connection which does not return to pool will make pool start a leak detection, 0 for not specified
+   * @param jdbcUrl  jdbc url for data source
+   * @param username database username, optional
+   * @param password database password, optional
    * @return data source
    */
   def createDataSource(
-                        jdbcUrl: String,
+                        jdbcUrl : String,
                         username: String,
-                        password: String): DataSource =
+                        password: String
+                      ): DataSource =
     createDataSource(jdbcUrl, username, password, DEFAULT_MAX_POOL_SIZE, DEFAULT_LEAK_DETECTION_THRESHOLD_SECONDS)
 
+  /**
+   * Create a HikariDataSource from given arguments.
+   *
+   * @param jdbcUrl  jdbc url for data source
+   * @param username database username, optional
+   * @param password database password, optional
+   * @return data source
+   */
+  def createDataSource(
+                        jdbcUrl : String
+                      ): DataSource =
+    createDataSource(jdbcUrl, null, null)
 
-    def tryLoadHikariConfig(resourceLoader: ResourceLoader, configPropertiesFile: String): HikariConfig = {
+
+  def tryLoadHikariConfig(resourceLoader: ResourceLoader, configPropertiesFile: String): HikariConfig = {
     var hc: HikariConfig = null
 
     val rs = ServUtils.tryLoadResource(configPropertiesFile, resourceLoader)
@@ -108,13 +123,40 @@ object DbHelper {
     JdbcContext(txMgr, jdbcTemplate)
   }
 
+  def silentClose(resource: Closeable): Unit = {
+    try {
+      resource.close()
+    } catch {
+      case t: Throwable =>
+    }
+  }
+
+  def inTrans(ds: DataSource, func: (Connection) => Unit): Unit = {
+    Using.resource(ds.getConnection) {
+      conn => {
+        conn.setAutoCommit(false)
+        try {
+          func(conn)
+
+          conn.commit()
+        } catch {
+          case t: Throwable =>
+            conn.rollback()
+            throw t
+        }
+      }
+    }
+  }
+
   def tableExists(ds: DataSource, sqlDialect: SqlDialect, tableName: String): Boolean = {
     val jdbcTemplate = new JdbcTemplate(ds)
-    jdbcTemplate.execute(new ConnectionCallback[Boolean] {
-      override def doInConnection(con: Connection): Boolean = {
-        sqlDialect.tableExists(con, tableName)
+    jdbcTemplate.execute(
+      new ConnectionCallback[Boolean] {
+        override def doInConnection(con: Connection): Boolean = {
+          sqlDialect.tableExists(con, tableName)
+        }
       }
-    })
+    )
   }
 
 
@@ -196,9 +238,11 @@ object DbHelper {
     qryValue(sql, pss, (rs, _) => rowMapper.mapRow(rs, 0)).orNull
 
   def qryObjectEx[T >: Null](sql: String, setter: StatementSetter, mapper: ResultSetMapper[T])(implicit conn: Connection): T =
-    qryValueEx(sql, setter, acc => {
-      mapper.map(acc)
-    }).orNull
+    qryValueEx(
+      sql, setter, acc => {
+        mapper.map(acc)
+      }
+    ).orNull
 
   def qryList[T >: Null](sql: String, pss: PreparedStatementSetter, rowMapper: RowMapper[T])(implicit conn: Connection): java.util.List[T] = {
     val list = new util.ArrayList[T]()
@@ -309,19 +353,21 @@ object DbHelper {
       val binder = StatementBinder(st)
 
 
-      argumentEntities.forEach(a => {
-        st.clearParameters()
-        binding.bind(a, binder.restart())
-        st.addBatch()
+      argumentEntities.forEach(
+        a => {
+          st.clearParameters()
+          binding.bind(a, binder.restart())
+          st.addBatch()
 
-        cnt += 1
-        if (cnt == batchSize) {
-          val updated = st.executeBatch()
-          r ++= updated
+          cnt += 1
+          if (cnt == batchSize) {
+            val updated = st.executeBatch()
+            r ++= updated
 
-          cnt = 0
+            cnt = 0
+          }
         }
-      })
+      )
 
       if (cnt > 0)
         r ++= st.executeBatch()
@@ -339,19 +385,21 @@ object DbHelper {
     try {
       var cnt = 0
 
-      argumentEntities.forEach(a => {
-        st.clearParameters()
-        binding.setParams(a, st)
-        st.addBatch()
+      argumentEntities.forEach(
+        a => {
+          st.clearParameters()
+          binding.setParams(a, st)
+          st.addBatch()
 
-        cnt += 1
-        if (cnt == batchSize) {
-          val updated = st.executeBatch()
-          r ++= updated
+          cnt += 1
+          if (cnt == batchSize) {
+            val updated = st.executeBatch()
+            r ++= updated
 
-          cnt = 0
+            cnt = 0
+          }
         }
-      })
+      )
 
       if (cnt > 0)
         r ++= st.executeBatch()
@@ -370,17 +418,19 @@ object DbHelper {
       val binder = StatementBinder(st)
 
 
-      argumentEntities.forEach(a => {
-        st.clearParameters()
-        binding.bind(a, binder.restart())
-        st.addBatch()
+      argumentEntities.forEach(
+        a => {
+          st.clearParameters()
+          binding.bind(a, binder.restart())
+          st.addBatch()
 
-        cnt += 1
-        if (cnt == batchSize) {
-          st.executeBatch()
-          cnt = 0
+          cnt += 1
+          if (cnt == batchSize) {
+            st.executeBatch()
+            cnt = 0
+          }
         }
-      })
+      )
 
       if (cnt > 0)
         st.executeBatch()
@@ -448,6 +498,14 @@ object DbHelper {
 
   def boolStatementSetter(value: Boolean): StatementSetter = new StatementSetter {
     override def set(binder: StatementBinder): Unit = binder.setBool(value)
+  }
+
+  def dateTimeStmtSetter(value: OffsetDateTime): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setOffsetDateTime(value)
+  }
+
+  def dateTimeStmtSetter(epochMillis: Long): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setOffsetDateTime(epochMillis)
   }
 
 }

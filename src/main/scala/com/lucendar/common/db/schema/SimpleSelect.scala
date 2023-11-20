@@ -2,8 +2,8 @@ package com.lucendar.common.db.schema
 
 
 import com.lucendar.common.db.rest.SortColumn
+import com.lucendar.common.types.rest.Pagination
 import info.gratour.common.error.{ErrorWithCode, Errors}
-import info.gratour.common.types.rest.Pagination
 
 class SimpleSelect(sql: String) {
 
@@ -111,7 +111,7 @@ class SimpleSelect(sql: String) {
   def paginate(limit: Int,
                page: Int // 1 based
               ): SimpleSelect =
-    paginate(Pagination(limit, page))
+    paginate(new Pagination(limit, page))
 
   def limit(recordCount: Int): SimpleSelect = {
     if (paginationClause != null)
