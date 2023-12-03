@@ -5,8 +5,8 @@ plugins {
 //    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
-group 'com.lucendar.common'
-version '1.1.0-SNAPSHOT'
+group 'com.lucendar'
+version '2.0.0-SNAPSHOT'
 
 compileJava.options.encoding = 'UTF-8'
 compileScala.options.encoding = 'UTF-8'
@@ -44,8 +44,8 @@ dependencies {
 
 
 //    implementation('info.gratour.common:gratour-common:3.2.8')
-    implementation('com.lucendar.common:lucendar-common:1.0.0-SNAPSHOT')
-    implementation('com.lucendar.common:server-common:2.0.0-SNAPSHOT')
+    implementation('com.lucendar:lucendar-common:2.0.0-SNAPSHOT')
+    implementation('com.lucendar:server-common:3.0.0-SNAPSHOT')
 }
 
 test {

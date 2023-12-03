@@ -1,3 +1,10 @@
+# 2.0.0 [2023-12-03]
+## Changes
+- Maven group id changed to `com.lucendar`
+- Dependencies
+  - Bump `lucendar-common` to 2.0.0
+  - Bump `server-common` to 3.0.0
+
 # 1.1.0 [2023-10-25]
 ## Improvement
 - `com.lucendar.common.db.jdbc.StatementBinder.setShortUseInteger` added
