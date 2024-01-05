@@ -220,7 +220,7 @@ object DbHelper {
     qryValue(sql, pss, (rs, _) => rs.getLong(1))
 
   def qryLongValueEx(sql: String, setter: StatementSetter = null)(implicit conn: Connection): Option[Long] =
-    qryValueEx(sql, setter, rs => rs.long())
+    qryValueEx(sql, setter, rs => rs.bigInt())
 
   def qryStringValue(sql: String, pss: PreparedStatementSetter = null)(implicit conn: Connection): Option[String] =
     qryValue(sql, pss, (rs, _) => rs.getString(1))

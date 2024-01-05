@@ -13,6 +13,7 @@ class SimpleSelect(sql: String) {
   private val orderClause = new StringBuilder()
   private var paginationClause: String = _
   private var limit: Integer = _
+  private var offset: Integer = _
 
   def reset(sql: String): Unit = {
     str.clear()
@@ -99,25 +100,41 @@ class SimpleSelect(sql: String) {
   def paginate(pagination: Pagination): SimpleSelect = {
 
     if (pagination != null) {
-      if (limit != null)
-        throw new ErrorWithCode(Errors.ILLEGAL_STATE, "pagination and limit can not be both applied.")
+      if (limit != null || offset != null)
+        throw new ErrorWithCode(Errors.ILLEGAL_STATE, "pagination and limit/offset can not be both applied.")
 
-      paginationClause = " LIMIT " + pagination.limit + " OFFSET " + ((pagination.page - 1) * pagination.limit)
+      paginationClause = " LIMIT " + pagination.limit + " OFFSET " + pagination.offset()
     }
 
     this
   }
 
-  def paginate(limit: Int,
-               page: Int // 1 based
+  def paginate(
+                limit: Int,
+                page : Int // 1 based
               ): SimpleSelect =
     paginate(new Pagination(limit, page))
 
-  def limit(recordCount: Int): SimpleSelect = {
+  def limit(limit: Int): SimpleSelect = {
+    if (limit < 1)
+      throw ErrorWithCode.invalidParam("limit")
+
     if (paginationClause != null)
       throw new ErrorWithCode(Errors.ILLEGAL_STATE, "pagination and limit can not be both applied.")
 
-    limit = recordCount
+    this.limit = limit
+
+    this
+  }
+
+  def offset(offset: Int): SimpleSelect = {
+    if (offset < 0)
+      throw ErrorWithCode.invalidParam("offset")
+
+    if (paginationClause != null)
+      throw new ErrorWithCode(Errors.ILLEGAL_STATE, "pagination and offset can not be both applied.")
+
+    this.offset = offset;
 
     this
   }
@@ -139,9 +156,13 @@ class SimpleSelect(sql: String) {
     if (addOrderByClause && orderClause.nonEmpty)
       r.append(" ORDER BY ").append(orderClause)
 
-    if (limit != null)
-      r.append(" LIMIT " + limit)
-    else if (addPaginationClause && (paginationClause != null))
+    if (limit != null || offset != null) {
+      if (limit != null)
+        r.append(" LIMIT " + limit)
+
+      if (offset != null)
+        r.append(" OFFSET " + offset)
+    } else if (addPaginationClause && (paginationClause != null))
       r.append(paginationClause)
 
     r.toString()
@@ -158,7 +179,16 @@ class SimpleSelect(sql: String) {
 
     val orderBy = if (orderClause.isEmpty) "" else " ORDER BY " + orderClause.toString()
     val page =
-      if (limit != null) " LIMIT " + limit
+      if (limit != null || offset != null) {
+        if (limit != null) {
+          if (offset != null)
+            " LIMIT " + limit + " OFFSET " + offset
+          else
+            " LIMIT " + limit
+        } else {
+          " OFFSET " + offset
+        }
+      }
       else if (paginationClause == null) ""
       else paginationClause
 

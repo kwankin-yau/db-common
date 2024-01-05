@@ -3,6 +3,7 @@ package com.lucendar.common.db.jdbc
 
 import com.google.gson.{Gson, GsonBuilder}
 import com.lucendar.common.utils.DateTimeUtils
+import com.lucendar.common.utils.DateTimeUtils.BeijingConv
 import org.springframework.jdbc.core.RowMapper
 
 import java.sql.{ResultSet, SQLException, Timestamp}
@@ -60,7 +61,18 @@ class ResultSetAccessor(val resultSet: ResultSet) {
       Some(r)
   }
 
+  /**
+   *
+   * @return
+   * @deprecated use int32() instead due to int() method is not direct visible to java source code.
+   */
+  @Deprecated
   def int(): Int = {
+    colIndex += 1
+    rs.getInt(colIndex)
+  }
+
+  def int32(): Int = {
     colIndex += 1
     rs.getInt(colIndex)
   }
@@ -83,10 +95,30 @@ class ResultSetAccessor(val resultSet: ResultSet) {
       Some(r)
   }
 
+  /**
+   *
+   * @return
+   * @deprecated use bigInt() instead due to long() method is not direct visible to java source code.
+   */
+  @Deprecated
   def long(): Long = {
     colIndex += 1
     rs.getLong(colIndex)
   }
+  def bigInt(): Long = {
+    colIndex += 1
+    rs.getLong(colIndex)
+  }
+
+  def bigIntObj(): java.lang.Long = {
+    colIndex += 1
+    val r = rs.getLong(colIndex)
+    if (rs.wasNull())
+      null
+    else
+      r
+  }
+
 
   def longObj(): java.lang.Long = {
     colIndex += 1
@@ -236,8 +268,12 @@ class ResultSetAccessor(val resultSet: ResultSet) {
    * Get current OffsetDateTime value and convert to convenient date time format using default `zoneId`.
    *
    * @return Convenient date time format string.
+   * @deprecated Use com.lucendar.common.db.jdbc.ResultSetAccessor#beijingConvDateTimeStr() instead
    */
+  @Deprecated
   def convenientDateTimeStr(): String = convenientDateTimeStr(null)
+
+  def beijingConvDateTimeStr(): String = BeijingConv.odtToStr(offsetDateTime());
 
 
   def epochMillisLong(): Long = {

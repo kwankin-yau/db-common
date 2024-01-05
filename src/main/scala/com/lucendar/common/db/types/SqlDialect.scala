@@ -46,7 +46,7 @@ trait SqlDialect {
 
 object SqlDialects {
 
-  final val POSTGRESQL = "pg"
+  final val POSTGRESQL = "postgresql"
   final val H2 = "h2"
   final val ORACLE = "oracle"
   final val SQL_SERVER = "sqlserver"

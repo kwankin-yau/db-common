@@ -1,5 +1,16 @@
 # 2.0.0 [2023-12-03]
+## Improvement
+- Introduce `SqlDialectProvider`
+- Introduce `com.lucendar.common.db.jdbc.StatementBinder.setOdtBeijingConv`
+- Introduce `com.lucendar.common.db.jdbc.ResultSetAccessor.beijingConvDateTimeStr`
+- Introduce `com.lucendar.common.db.jdbc.ResultSetAccessor.bigIntObj`
+- Introduce `com.lucendar.common.db.jdbc.ResultSetAccessor.int32`, `bigInt`, `bigIntObj`
+- Introduce `com.lucendar.common.db.schema.SimpleSelect.offset`
+
+
 ## Changes
+- Breaking changes: 
+  - value of `com.lucendar.common.db.types.SqlDialects.POSTGRESQL` changed to `postgresql`.
 - Maven group id changed to `com.lucendar`
 - Dependencies
   - Bump `lucendar-common` to 2.0.0

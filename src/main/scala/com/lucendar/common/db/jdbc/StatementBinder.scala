@@ -54,6 +54,11 @@ class StatementBinder(val st: PreparedStatement) {
     st.setShort(idx, value)
   }
 
+  def setShort(value: Int): Unit = {
+    idx += 1
+    st.setShort(idx, value.toShort)
+  }
+
   def setShortObject(value: java.lang.Short): Unit =
     if (value != null)
       setShort(value)
@@ -196,6 +201,17 @@ class StatementBinder(val st: PreparedStatement) {
       setOffsetDateTime(OffsetDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), DateTimeUtils.DEFAULT_ZONE_ID))
     else
       setNull(Types.TIMESTAMP_WITH_TIMEZONE)
+
+  /**
+   *
+   * @param beijingConvDateTime date time in format `yyyy-MM-dd HH:mm:ss`, treat as Beijing time.
+   */
+  def setBeijingConvOdt(beijingConvDateTime: String): Unit = {
+    if (beijingConvDateTime != null)
+      setOffsetDateTime(DateTimeUtils.BeijingConv.strToOdt(beijingConvDateTime));
+    else
+      setNull(Types.TIMESTAMP_WITH_TIMEZONE);
+  }
 
   def setBinaryStream(stream: java.io.InputStream): Unit =
     if (stream != null) {
