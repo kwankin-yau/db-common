@@ -64,10 +64,10 @@ publishing {
         maven {
             if (project.version.toString().endsWith("-SNAPSHOT")) {
                 name = "snapshotsRepo"
-                url = "https://wx.gratour.info:7999/repository/maven-snapshots/"
+                url = "${snapshotUrl}"
             } else {
                 name = "releasesRepo"
-                url = "https://wx.gratour.info:7999/repository/my-nexus/"
+                url = "${releaseUrl}"
             }
 
             credentials {
