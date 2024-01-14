@@ -2,11 +2,11 @@ plugins {
     id 'java-library'
     id 'scala'
     id 'maven-publish'
-//    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+    id 'signing'
 }
 
 group 'com.lucendar'
-version '2.0.0-SNAPSHOT'
+version '2.0.0'
 
 compileJava.options.encoding = 'UTF-8'
 compileScala.options.encoding = 'UTF-8'
@@ -14,12 +14,8 @@ compileScala.options.encoding = 'UTF-8'
 sourceCompatibility = '17'
 targetCompatibility = '17'
 
-
-
 repositories {
-    mavenLocal()
     mavenCentral()
-
 }
 
 dependencies {
@@ -43,44 +39,66 @@ dependencies {
     implementation group: 'com.github.jsqlparser', name: 'jsqlparser', version: '4.2'
 
 
-//    implementation('info.gratour.common:gratour-common:3.2.8')
-    implementation('com.lucendar:lucendar-common:2.0.0-SNAPSHOT')
-    implementation('com.lucendar:server-common:3.0.0-SNAPSHOT')
+    implementation('com.lucendar:lucendar-common:2.0.0')
+    implementation('com.lucendar:server-common:3.0.0')
 }
 
 test {
     useJUnitPlatform()
 }
 
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    archiveClassifier = 'sources'
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-
-
 publishing {
-    repositories {
-        maven {
-            if (project.version.toString().endsWith("-SNAPSHOT")) {
-                name = "snapshotsRepo"
-                url = "${snapshotUrl}"
-            } else {
-                name = "releasesRepo"
-                url = "${releaseUrl}"
-            }
-
-            credentials {
-                username = "${ossUser}"
-                password = "${ossPwd}"
-            }
-        }
-    }
     publications {
         maven(MavenPublication) {
             from components.java
-            artifact sourceJar
+
+            pom {
+                name = 'db-common'
+                packaging = 'jar'
+                // optionally artifactId can be defined here
+                description = 'Spring Jdbc utility library.'
+                url = 'https://github.com/kwankin-yau/db-common'
+
+                scm {
+                    connection = 'https://github.com/kwankin-yau/db-common.git'
+                    developerConnection = 'https://github.com/kwankin-yau/db-common.git'
+                    url = 'https://github.com/kwankin-yau/db-common'
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT'
+                        url = 'http://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'kky'
+                        name = 'kwankin-yau'
+                        email = 'alphax@vip.163.com'
+                    }
+                }
+            }
         }
 
     }
 }
+
+javadoc {
+    options.encoding = 'UTF-8'
+
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+signing {
+    sign publishing.publications.maven
+}
+

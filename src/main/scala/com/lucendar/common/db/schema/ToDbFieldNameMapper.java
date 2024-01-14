@@ -8,11 +8,9 @@ public interface ToDbFieldNameMapper {
     /**
      * Map a field name to one or more database column name.
      * When map to multiple database column name:
-     * <ol>
-     *     <li>For TableSchema, only the first column name used.</li>
-     *     <li>For RowMapper, only the first column name used.</li>
-     *     <li>For QueryParamsSpec, the returned database column names are in an `OR` relation.</li>     *
-     * </ol>
+     * - For TableSchema, only the first column name used.
+     * - For RowMapper, only the first column name used.
+     * - For QueryParamsSpec, the returned database column names are in an `OR` relation.
      *
      * @param apiFieldName API field name.
      * @return corresponding database column name.
