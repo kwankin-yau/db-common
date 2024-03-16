@@ -133,6 +133,10 @@ class StatementBinder(val st: PreparedStatement) {
     else
       setNull(Types.FLOAT)
 
+  @inline def setFloat(value: Float): Unit = setSingle(value)
+  @inline def setFloatObject(value: java.lang.Float): Unit = setSingleObject(value)
+  @inline def setFloatOpt(value: Option[Float]): Unit = setSingleOpt(value)
+
 
   def setDouble(value: Double): Unit = {
     idx += 1
@@ -208,9 +212,20 @@ class StatementBinder(val st: PreparedStatement) {
    */
   def setBeijingConvOdt(beijingConvDateTime: String): Unit = {
     if (beijingConvDateTime != null)
-      setOffsetDateTime(DateTimeUtils.BeijingConv.strToOdt(beijingConvDateTime));
+      setOffsetDateTime(DateTimeUtils.BeijingConv.strToOdt(beijingConvDateTime))
     else
-      setNull(Types.TIMESTAMP_WITH_TIMEZONE);
+      setNull(Types.TIMESTAMP_WITH_TIMEZONE)
+  }
+
+  /**
+   *
+   * @param millis Epoch milli-seconds.
+   */
+  def setBeijingConvOdt(millis: java.lang.Long): Unit = {
+    if (millis != null)
+      setOffsetDateTime(OffsetDateTime.ofInstant(Instant.ofEpochMilli(millis), DateTimeUtils.ZONE_OFFSET_BEIJING))
+    else
+      setNull(Types.TIMESTAMP_WITH_TIMEZONE)
   }
 
   def setBinaryStream(stream: java.io.InputStream): Unit =

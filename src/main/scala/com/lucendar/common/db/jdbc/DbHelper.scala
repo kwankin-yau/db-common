@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, Prepared
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
 import java.io.Closeable
-import java.sql.{Connection, PreparedStatement, ResultSet}
+import java.sql.{Connection, PreparedStatement, ResultSet, Statement}
 import java.time.OffsetDateTime
 import java.{lang, util}
 import java.util.Properties
@@ -325,6 +325,39 @@ object DbHelper {
 
   def updateEx(sql: String, setter: StatementSetter = null)(implicit conn: Connection): Int =
     update(sql, StatementSetterWrapper(setter))
+
+  def updateWithGenKey(sql: String, pss: PreparedStatementSetter = null)(implicit conn: Connection): UpdateCountAndKey = {
+    if (pss != null) {
+      val st = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+      try {
+        pss.setValues(st)
+
+        val updateCount = st.executeUpdate()
+
+        Using.resource(st.getGeneratedKeys) { rs =>
+          rs.next()
+          new UpdateCountAndKey(updateCount, rs.getLong(1))
+        }
+      } finally {
+        st.close()
+      }
+    } else {
+      val st = conn.createStatement()
+      try {
+        val updateCount = st.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS)
+
+        Using.resource(st.getGeneratedKeys) { rs =>
+          rs.next()
+          new UpdateCountAndKey(updateCount, rs.getLong(1))
+        }
+      } finally {
+        st.close()
+      }
+    }
+  }
+
+  def updateExWithGenKey(sql: String, setter: StatementSetter = null)(implicit conn: Connection): UpdateCountAndKey =
+    updateWithGenKey(sql, StatementSetterWrapper(setter))
 
   def execute(sql: String, pss: PreparedStatementSetter = null)(implicit conn: Connection): Unit = {
     if (pss != null) {

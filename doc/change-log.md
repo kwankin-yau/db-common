@@ -1,3 +1,9 @@
+# 2.1.0 [2024-03-04]
+## 改进
+- 引入 `ServerVer` （数据库）服务端版本号
+- 引入 `com.lucendar.common.db.jdbc.StatementBinder.setBeijingConvOdt(Long)`
+- 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
+
 # 2.0.0 [2023-12-03]
 ## Improvement
 - Introduce `SqlDialectProvider`

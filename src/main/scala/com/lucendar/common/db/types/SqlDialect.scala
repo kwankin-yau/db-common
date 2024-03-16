@@ -10,9 +10,18 @@ package com.lucendar.common.db.types
 import info.gratour.common.error.ErrorWithCode
 
 import java.sql.Connection
+import javax.sql.DataSource
 import scala.util.Using
 
+/**
+ * SQL方言
+ */
 trait SqlDialect {
+
+  /**
+   * 取SQL方言的 ID。如 [[com.lucendar.common.db.types.SqlDialects#POSTGRESQL()]]
+   * @return SQL方言的 ID。
+   */
   def id: String
 
   def stringValueLiteral(s: String): String
@@ -21,8 +30,31 @@ trait SqlDialect {
 
   def publicSchemaName: String = "PUBLIC"
 
+  /**
+   * 是否支持单条语句分页 SQL。
+   *
+   * @return 是否支持单条语句分页 SQL。
+   */
   def supportSingleStatementPagination: Boolean = false
 
+  /**
+   * 取数据库服务端版本号
+   *
+   * @param conn 连接对象
+   * @return 数据库服务端版本号
+   */
+  def getServerVer(conn: Connection): ServerVer
+  def getServerVer(ds: DataSource): ServerVer =
+    Using.resource(ds.getConnection) { conn => getServerVer(conn) }
+
+  /**
+   * 查询给定数据表是否存在于数据库中。
+   *
+   * @param conn 数据库连接
+   * @param schemaName Schema 名称。
+   * @param tableName 表名
+   * @return 给定数据表是否存在于数据库中。
+   */
   def tableExists(conn: Connection, schemaName: String, tableName: String): Boolean = {
     val sql =
       """
@@ -76,38 +108,4 @@ object SqlDialects {
       throw ErrorWithCode.invalidParam("jdbcUrl", s"Unrecognized SqlDialect: `$jdbcUrl`.")
   }
 
-
 }
-
-//object SQLDialect_Pg extends SQLDialect {
-//  override def id: String = SQLDialects.POSTGRESQL
-//
-//  override def stringValueLiteral(s: String): String =
-//    org.postgresql.core.Utils.escapeLiteral(null, s, true).toString
-//
-//  override def tableExists(conn: Connection, tableName: String): Boolean = ???
-//
-//  override def tableExists(conn: Connection, schemaName: String, tableName: String): Boolean = ???
-//}
-
-//object SQLDialect_H2 extends SQLDialect {
-//  override def id: String = SQLDialects.H2
-//
-//  override def stringValueLiteral(s: String): String = {
-//    throw new SQLException(s"stringValueLiteral() is not supported in dialect `$id`.")
-//  }
-//
-//  override def tableExists(conn: Connection, tableName: String): Boolean = tableExists(conn, "PUBLIC", tableName)
-//
-//  override def tableExists(conn: Connection, schemaName: String, tableName: String): Boolean = {
-//    val sql = s"SELECT * FROM information_schema.tables WHERE table_schema = ? AND table_name = ?"
-//    Using.resource(conn.prepareStatement(sql)) { st =>
-//      st.setString(1, schemaName)
-//      st.setString(2, tableName.toUpperCase)
-//
-//      Using.resource(st.executeQuery()) { rs =>
-//        rs.next()
-//      }
-//    }
-//  }
-//}
