@@ -114,7 +114,20 @@ object DbHelper {
     hc
   }
 
-  case class JdbcContext(txMgr: DataSourceTransactionManager, jdbcTemplate: JdbcTemplate)
+  /**
+   * JDBC 上下文
+   *
+   * @param txMgr 数据源事务管理器
+   * @param jdbcTemplate 可供使用的 JdbcTemplate 对象
+   */
+  case class JdbcContext(txMgr: DataSourceTransactionManager, jdbcTemplate: JdbcTemplate) {
+
+    /**
+     * 返回数据源( DataSource )
+     * @return 数据源( DataSource )
+     */
+    def ds: DataSource = txMgr.getDataSource
+  }
 
   def createJdbcContext(ds: DataSource): JdbcContext = {
     val txMgr = new DataSourceTransactionManager(ds)

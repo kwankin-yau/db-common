@@ -3,6 +3,8 @@
 - 引入 `ServerVer` （数据库）服务端版本号
 - 引入 `com.lucendar.common.db.jdbc.StatementBinder.setBeijingConvOdt(Long)`
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
+- `JdbcContext` 增加 `ds` 方法
+- 引入 `com.lucendar.common.db.rest.QueryParams.HookedResultSetMapper`
 
 # 2.0.0 [2023-12-03]
 ## Improvement

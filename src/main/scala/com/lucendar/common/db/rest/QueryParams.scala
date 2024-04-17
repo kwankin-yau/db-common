@@ -1,5 +1,6 @@
 package com.lucendar.common.db.rest
 
+import com.lucendar.common.db.jdbc.{ResultSetAccessor, ResultSetMapper}
 import com.lucendar.common.db.rest.QueryParams.HookedMapper
 import com.lucendar.common.db.schema.{FieldConstraint, FieldDataType, FieldNameMapper, FieldResolver, MapperBuilder, PaginationSupportSpec}
 import com.lucendar.common.db.types.{Predication, QueryResult, QueryResultObjectLoader, SqlDialect}
@@ -569,6 +570,28 @@ object QueryParams {
         trc
       else
         0L
+  }
+
+  class HookedResultSetMapper[A <: AnyRef](val underlying: ResultSetMapper[A])(implicit classTag: ClassTag[A]) extends ResultSetMapper[A] {
+
+    private var trc: java.lang.Long = _
+
+    override def map(acc: ResultSetAccessor): A = {
+      if (trc == null) {
+        trc = acc.rs.getLong(QueryParams.TOTAL_RECORD_COUNT_COLUMN_NAME)
+        if (trc == 0L)
+          return null.asInstanceOf[A]
+      }
+
+      underlying.map(acc)
+    }
+
+    def totalRecordCount: Long =
+      if (trc != null)
+        trc
+      else
+        0L
+
   }
 
   def parseSortColumns(s: String): Array[SortColumn] = {
