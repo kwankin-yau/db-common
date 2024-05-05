@@ -5,6 +5,12 @@
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
 - `JdbcContext` 增加 `ds` 方法
 - 引入 `com.lucendar.common.db.rest.QueryParams.HookedResultSetMapper`
+- 引入 `com.lucendar.common.db.jdbc.DbHelper.beijingDateTimeStmtSetter`
+
+## 变更
+- 不兼容变更
+  - `StatementBinder.setOffsetDateTime(java.lang.Long)` 增加`zoneId: ZoneId`参数
+  - `DbHelper.dateTimeStmtSetter(java.lang.Long)`增加`zoneId: ZoneId`参数
 
 # 2.0.0 [2023-12-03]
 ## Improvement

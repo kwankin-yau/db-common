@@ -11,13 +11,14 @@ import com.lucendar.common.db.types.SqlDialect
 import com.lucendar.common.db.types.Types.{MultiBinding, MultiSetting}
 import com.lucendar.common.serv.utils.ServUtils
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import io.micrometer.common.lang.Nullable
 import org.springframework.core.io.ResourceLoader
 import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, PreparedStatementSetter, RowMapper}
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
 import java.io.Closeable
 import java.sql.{Connection, PreparedStatement, ResultSet, Statement}
-import java.time.OffsetDateTime
+import java.time.{OffsetDateTime, ZoneId}
 import java.{lang, util}
 import java.util.Properties
 import javax.sql.DataSource
@@ -550,8 +551,12 @@ object DbHelper {
     override def set(binder: StatementBinder): Unit = binder.setOffsetDateTime(value)
   }
 
-  def dateTimeStmtSetter(epochMillis: Long): StatementSetter = new StatementSetter {
-    override def set(binder: StatementBinder): Unit = binder.setOffsetDateTime(epochMillis)
+  def beijingDateTimeStmtSetter(epochMillis: Long): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setBeijingConvOdt(epochMillis)
+  }
+
+  def dateTimeStmtSetter(epochMillis: Long, @Nullable zoneId: ZoneId): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setOffsetDateTime(epochMillis, zoneId)
   }
 
 }

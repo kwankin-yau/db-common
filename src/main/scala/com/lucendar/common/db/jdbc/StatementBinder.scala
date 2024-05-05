@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.PreparedStatementSetter
 
 import java.io.ByteArrayInputStream
 import java.sql.{CallableStatement, PreparedStatement, Timestamp, Types}
-import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime}
+import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneId}
 
 class StatementBinder(val st: PreparedStatement) {
 
@@ -200,9 +200,9 @@ class StatementBinder(val st: PreparedStatement) {
     else
       setNull(Types.TIMESTAMP_WITH_TIMEZONE)
 
-  def setOffsetDateTime(epochMilli: java.lang.Long): Unit =
+  def setOffsetDateTime(epochMilli: java.lang.Long, zoneId: ZoneId): Unit =
     if (epochMilli != null)
-      setOffsetDateTime(OffsetDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), DateTimeUtils.DEFAULT_ZONE_ID))
+      setOffsetDateTime(OffsetDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), if (zoneId != null) zoneId else DateTimeUtils.DEFAULT_ZONE_ID))
     else
       setNull(Types.TIMESTAMP_WITH_TIMEZONE)
 
