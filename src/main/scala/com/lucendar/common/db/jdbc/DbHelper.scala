@@ -535,6 +535,14 @@ object DbHelper {
     override def set(binder: StatementBinder): Unit = binder.setString(value)
   }
 
+  def twoStrStatementSetter(s1: String, s2: String): StatementSetter = new StatementSetter {
+
+    override def set(binder: StatementBinder): Unit = {
+      binder.setString(s1)
+      binder.setString(s2)
+    }
+  }
+
   def intStatementSetter(value: Int): StatementSetter = new StatementSetter {
     override def set(binder: StatementBinder): Unit = binder.setInt(value)
   }

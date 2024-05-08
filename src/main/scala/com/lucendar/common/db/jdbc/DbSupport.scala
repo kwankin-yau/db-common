@@ -44,6 +44,15 @@ trait DbSupport {
 
   protected def inTransRequired[T](op: () => T): T = tx(op)
 
+  protected def execute(sql: String, setter: StatementSetter = null): Unit =
+    jdbc.execute(new ConnectionCallback[Void] {
+      override def doInConnection(con: Connection): Void = {
+        DbHelper.executeEx(sql, setter)(con)
+        null
+      }
+    })
+
+
   protected def existsQry(sql: String, pss: PreparedStatementSetter): Boolean = jdbc.execute(new ConnectionCallback[Boolean] {
     override def doInConnection(con: Connection): Boolean = DbHelper.existsQry(sql, pss)(con)
   })
@@ -113,7 +122,6 @@ trait DbSupport {
 
   def qryListMix[T >: Null](sql: String, setter: StatementSetter, mapper: RowMapper[T]): java.util.List[T] =
     qryList(sql, StatementSetterWrapper(setter), mapper)
-
 
 
   protected def update(sql: String, pss: PreparedStatementSetter = null): Int = jdbc.execute(new ConnectionCallback[Integer] {

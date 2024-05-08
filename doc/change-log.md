@@ -5,7 +5,9 @@
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
 - `JdbcContext` 增加 `ds` 方法
 - 引入 `com.lucendar.common.db.rest.QueryParams.HookedResultSetMapper`
-- 引入 `com.lucendar.common.db.jdbc.DbHelper.beijingDateTimeStmtSetter`
+- `DbHelper` 增加 `beijingDateTimeStmtSetter`, `twoStrStatementSetter` 方法
+- 引入 `com.lucendar.common.db.jdbc.DbSupport.execute`
+- `DbUtils` 增加 `batchInsertSql`, `splitColumns`, `batchInsertOnConflictNoActionSql`, `upsertSql` 方法
 
 ## 变更
 - 不兼容变更
