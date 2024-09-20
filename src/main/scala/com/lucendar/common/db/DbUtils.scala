@@ -7,9 +7,6 @@
  * ***************************************************************************** */
 package com.lucendar.common.db
 
-import com.lucendar.common.db.jdbc.DbHelper
-import com.lucendar.common.types.KV
-
 object DbUtils {
 
   def valuesToSqlPlaceHolders(values: Array[_]): String =

@@ -5,9 +5,11 @@
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
 - `JdbcContext` 增加 `ds` 方法
 - 引入 `com.lucendar.common.db.rest.QueryParams.HookedResultSetMapper`
-- `DbHelper` 增加 `beijingDateTimeStmtSetter`, `twoStrStatementSetter` 方法
+- `DbHelper` 增加 `beijingDateTimeStmtSetter`, `twoStrStatementSetter`, `callEx2(String, (Connection, CallableStmtBinder) => T)` 方法
 - 引入 `com.lucendar.common.db.jdbc.DbSupport.execute`
 - `DbUtils` 增加 `batchInsertSql`, `splitColumns`, `batchInsertOnConflictNoActionSql`, `upsertSql` 方法
+- `CallableStmtBinder` 改名为 `CallableStmtHandler`, 并增加 `execute` 方法
+- 增加 `DERBY` 方言
 
 ## 变更
 - 不兼容变更

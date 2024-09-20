@@ -30,7 +30,7 @@ dependencies {
     implementation('org.scala-lang:scala-reflect:2.13.12')
 
     implementation('com.typesafe.scala-logging:scala-logging_2.13:3.9.5')
-
+    implementation 'org.checkerframework:checker-qual:3.36.0'
     implementation('org.springframework:spring-jdbc:6.0.6')
     implementation('org.springframework:spring-web:6.0.6')
 

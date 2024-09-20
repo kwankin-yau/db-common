@@ -696,12 +696,26 @@ object StatementBinder {
   def apply(ps: PreparedStatement): StatementBinder = new StatementBinder(ps)
 }
 
-class CallableStmtBinder(override val st: CallableStatement) extends StatementBinder(st) {
+class CallableStmtHandler(override val st: CallableStatement) extends StatementBinder(st) {
 
   def registerOutParameter(sqlType: Int): Unit = {
     idx += 1
     st.asInstanceOf[CallableStatement].registerOutParameter(idx, sqlType)
   }
+
+  /**
+   * Executes the SQL statement in this PreparedStatement object, which may be any kind of SQL statement. Some prepared
+   * statements return multiple results; the execute method handles these complex statements as well as the simpler form
+   * of statements handled by the methods executeQuery and executeUpdate.
+   * The execute method returns a boolean to indicate the form of the first result. You must call either the method
+   * getResultSet or getUpdateCount to retrieve the result; you must call getMoreResults to move to any subsequent
+   * result(s).
+   *
+   * @return true if the first result is a ResultSet object; false if the first result is an update count or there is
+   *         no result.
+   */
+  def execute(): Boolean =
+    st.execute()
 
   def getBool(colIndex: Int): Boolean =
     st.getBoolean(colIndex)
@@ -741,8 +755,8 @@ class CallableStmtBinder(override val st: CallableStatement) extends StatementBi
 
 }
 
-object CallableStmtBinder {
-  def apply(cs: CallableStatement): CallableStmtBinder = new CallableStmtBinder(cs)
+object CallableStmtHandler {
+  def apply(cs: CallableStatement): CallableStmtHandler = new CallableStmtHandler(cs)
 }
 
 trait StatementSetter {

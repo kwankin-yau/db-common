@@ -25,6 +25,7 @@ import javax.sql.DataSource
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Using
 
+
 object DbHelper {
 
   final val DEFAULT_MAX_POOL_SIZE = 20
@@ -498,6 +499,12 @@ object DbHelper {
   def callEx(sql: String, setter: StatementSetter = null)(implicit conn: Connection): Unit =
     call(sql, StatementSetterWrapper(setter))
 
+  def callEx2[T](sql: String, processor: CallStmtProcessor[T])(implicit conn: Connection): T =
+    Using.resource(conn.prepareCall(sql)) { st =>
+      val binder = new CallableStmtHandler(st)
+      processor.exec(conn, binder)
+    }
+
   final val StringValueRowMapper: RowMapper[String] = new RowMapper[String] {
     override def mapRow(rs: ResultSet, rowNum: Int): String = rs.getString(1)
   }
@@ -568,3 +575,4 @@ object DbHelper {
   }
 
 }
+

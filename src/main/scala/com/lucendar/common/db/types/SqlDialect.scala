@@ -8,8 +8,10 @@
 package com.lucendar.common.db.types
 
 import info.gratour.common.error.ErrorWithCode
+import org.checkerframework.checker.nullness.qual.{NonNull, Nullable}
 
 import java.sql.Connection
+import java.util
 import javax.sql.DataSource
 import scala.util.Using
 
@@ -84,28 +86,57 @@ object SqlDialects {
   final val SQL_SERVER = "sqlserver"
   final val MYSQL = "mysql"
   final val SQLITE = "sqlite"
+  final val DERBY = "derby"
+
+  private final val RegisteredSqlDialects: java.util.Map[String, SqlDialect] = new util.HashMap[String, SqlDialect]()
 
 
-  def detectIdFromJdbcUrl(jdbcUrl: String): String = {
+  def detectIdFromJdbcUrl(@NonNull jdbcUrl: String): String = {
     var p = jdbcUrl
     val idx = p.indexOf('/'.toChar)
     if (idx > 0)
       p = p.substring(0, idx)
 
-    if (p.contains("postgresql"))
+    if (p.contains(":postgresql:"))
       POSTGRESQL
-    else if (p.contains("h2"))
+    else if (p.contains(":derby:"))
+      DERBY
+    else if (p.contains(":h2:"))
       H2
-    else if (p.contains("mysql"))
+    else if (p.contains(":mysql:"))
       MYSQL
-    else if (p.contains("sqlserver"))
+    else if (p.contains(":sqlserver:"))
       SQL_SERVER
-    else if (p.contains("oracle"))
+    else if (p.contains(":oracle:"))
       ORACLE
-    else if (p.contains("sqlite"))
+    else if (p.contains(":sqlite:"))
       SQLITE
     else
       throw ErrorWithCode.invalidParam("jdbcUrl", s"Unrecognized SqlDialect: `$jdbcUrl`.")
   }
+
+  def register(@NonNull sqlDialect: SqlDialect): Unit = {
+    RegisteredSqlDialects.synchronized {
+      RegisteredSqlDialects.put(sqlDialect.id, sqlDialect)
+    }
+  }
+
+  @Nullable
+  def getRegistered(@NonNull sqlDialectId: String): SqlDialect = {
+    RegisteredSqlDialects.synchronized {
+      RegisteredSqlDialects.get(sqlDialectId)
+    }
+  }
+
+  @NonNull
+  def registeredSqlDialects(): java.util.List[SqlDialect] = {
+    RegisteredSqlDialects.synchronized {
+      val r = new util.ArrayList[SqlDialect]()
+      r.addAll(RegisteredSqlDialects.values());
+
+      r
+    }
+  }
+
 
 }
