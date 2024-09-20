@@ -26,6 +26,10 @@ trait SqlDialect {
    */
   def id: String
 
+  def isPostgreSQL: Boolean = id == SqlDialects.POSTGRESQL
+  def isDerby: Boolean = id == SqlDialects.DERBY
+  def isSqlite: Boolean = id == SqlDialects.SQLITE
+
   def stringValueLiteral(s: String): String
 
   def setConstraintsDeferred(conn: Connection): Unit

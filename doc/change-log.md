@@ -10,6 +10,7 @@
 - `DbUtils` 增加 `batchInsertSql`, `splitColumns`, `batchInsertOnConflictNoActionSql`, `upsertSql` 方法
 - `CallableStmtBinder` 改名为 `CallableStmtHandler`, 并增加 `execute` 方法
 - 增加 `DERBY` 方言
+- `SqlDialect` 增加 `isPostgreSQL`, `isDerby`, `isSqlite` 方法
 
 ## 变更
 - 不兼容变更
