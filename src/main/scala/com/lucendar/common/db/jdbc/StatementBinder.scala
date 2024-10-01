@@ -201,10 +201,15 @@ class StatementBinder(val st: PreparedStatement) {
     else
       setNull(Types.TIMESTAMP)
 
+  /**
+   *
+   * @param value datetime string in convenient date time format (with or without millis-seconds part) or ISO offset date time format.
+   *              for example: '2000-01-01 00:00:00', '2000-01-01 00:00:00.000", '2000-01-01T00:00:00.000'
+   */
   def setTimestamp(value: String): Unit =
     if (value != null) {
       idx +=1
-      val dt = BeijingConv.strToMillis(value)
+      val dt = DateTimeUtils.stringToMillis(value)
       st.setTimestamp(idx, new Timestamp(dt))
     } else
       setNull(Types.TIMESTAMP)
