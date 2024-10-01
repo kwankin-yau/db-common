@@ -214,6 +214,13 @@ class StatementBinder(val st: PreparedStatement) {
     } else
       setNull(Types.TIMESTAMP)
 
+  def setTimestamp(value: OffsetDateTime): Unit =
+    if (value != null) {
+      idx +=1
+      st.setTimestamp(idx, new Timestamp(value.toInstant.toEpochMilli))
+    } else
+      setNull(Types.TIMESTAMP)
+
   def setTimestampBeijing(value: LocalDateTime): Unit =
     if (value != null) {
       idx += 1
@@ -221,7 +228,6 @@ class StatementBinder(val st: PreparedStatement) {
       st.setTimestamp(idx, timestamp)
     } else
       setNull(Types.TIMESTAMP)
-
 
   def setOffsetDateTime(epochMilli: java.lang.Long, zoneId: ZoneId): Unit =
     if (epochMilli != null)

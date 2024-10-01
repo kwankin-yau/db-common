@@ -1,7 +1,8 @@
 # 2.1.0 [2024-03-04]
 ## 改进
 - 引入 `ServerVer` （数据库）服务端版本号
-- 引入 `com.lucendar.common.db.jdbc.StatementBinder.setBeijingConvOdt(Long), setTimestampBeijing(LocalDateTime), setTimestamp(String)`
+- 引入 `com.lucendar.common.db.jdbc.StatementBinder.setBeijingConvOdt(Long)`, 
+  `setTimestampBeijing(LocalDateTime)`, `setTimestamp(String)`, `setTimestamp(OffsetDateTime)`
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
 - `JdbcContext` 增加 `ds` 方法
 - 引入 `com.lucendar.common.db.rest.QueryParams.HookedResultSetMapper`
