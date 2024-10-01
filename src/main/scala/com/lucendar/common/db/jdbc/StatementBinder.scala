@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.lucendar.common.db.schema.FieldDataType
 import com.lucendar.common.db.types.Reflections
 import com.lucendar.common.utils.DateTimeUtils
+import com.lucendar.common.utils.DateTimeUtils.BeijingConv
 import com.typesafe.scalalogging.Logger
 import info.gratour.common.error.{ErrorWithCode, Errors}
 import org.springframework.jdbc.core.PreparedStatementSetter
@@ -185,20 +186,28 @@ class StatementBinder(val st: PreparedStatement) {
       idx += 1
       st.setObject(idx, value)
     } else
-      setNull(Types.TIMESTAMP_WITH_TIMEZONE)
+      setNull(Types.TIMESTAMP)
 
   def setTimestamp(value: Timestamp): Unit =
     if (value != null) {
       idx += 1
       st.setTimestamp(idx, value)
     } else
-      setNull(Types.TIMESTAMP_WITH_TIMEZONE)
+      setNull(Types.TIMESTAMP)
 
   def setTimestamp(epochMillis: java.lang.Long): Unit =
     if (epochMillis != null)
       setTimestamp(new Timestamp(epochMillis))
     else
-      setNull(Types.TIMESTAMP_WITH_TIMEZONE)
+      setNull(Types.TIMESTAMP)
+
+  def setTimestamp(value: String): Unit =
+    if (value != null) {
+      idx +=1
+      val dt = BeijingConv.strToMillis(value)
+      st.setTimestamp(idx, new Timestamp(dt))
+    } else
+      setNull(Types.TIMESTAMP)
 
   def setTimestampBeijing(value: LocalDateTime): Unit =
     if (value != null) {
