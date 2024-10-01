@@ -1,7 +1,7 @@
 # 2.1.0 [2024-03-04]
 ## 改进
 - 引入 `ServerVer` （数据库）服务端版本号
-- 引入 `com.lucendar.common.db.jdbc.StatementBinder.setBeijingConvOdt(Long)`
+- 引入 `com.lucendar.common.db.jdbc.StatementBinder.setBeijingConvOdt(Long), setTimestampBeijing(LocalDateTime)`
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.updateWithGenKey`
 - `JdbcContext` 增加 `ds` 方法
 - 引入 `com.lucendar.common.db.rest.QueryParams.HookedResultSetMapper`
@@ -11,6 +11,7 @@
 - `CallableStmtBinder` 改名为 `CallableStmtHandler`, 并增加 `execute` 方法
 - 增加 `DERBY` 方言
 - `SqlDialect` 增加 `isPostgreSQL`, `isDerby`, `isSqlite` 方法
+
 
 ## 变更
 - 不兼容变更
