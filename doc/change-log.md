@@ -13,7 +13,7 @@
 - 增加 `DERBY` 方言
 - `SqlDialect` 增加 `isPostgreSQL`, `isDerby`, `isSqlite` 方法
 - 引入 `com.lucendar.common.db.jdbc.DbHelper.timestampStmtSetter`
-
+- 引入 `com.lucendar.common.db.jdbc.ResultSetAccessor.date()`, `timestamp()` 方法
 
 ## 变更
 - 不兼容变更

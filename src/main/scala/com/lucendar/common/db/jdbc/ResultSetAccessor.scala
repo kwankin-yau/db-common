@@ -6,7 +6,7 @@ import com.lucendar.common.utils.DateTimeUtils
 import com.lucendar.common.utils.DateTimeUtils.BeijingConv
 import org.springframework.jdbc.core.RowMapper
 
-import java.sql.{ResultSet, SQLException, Timestamp}
+import java.sql.{Date, ResultSet, SQLException, Timestamp}
 import java.time.{LocalDate, LocalDateTime, LocalTime, OffsetDateTime, ZoneId}
 
 class ResultSetAccessor(val resultSet: ResultSet) {
@@ -211,6 +211,15 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   def decimal(): java.math.BigDecimal = {
     colIndex += 1
     rs.getBigDecimal(colIndex)
+  }
+  def getDate(): Date = {
+    colIndex += 1
+    rs.getDate(colIndex)
+  }
+
+  def timestamp(): Timestamp = {
+    colIndex += 1
+    rs.getTimestamp(colIndex)
   }
 
   def localDate(): LocalDate = {
