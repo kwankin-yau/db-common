@@ -10,7 +10,7 @@ import info.gratour.common.error.{ErrorWithCode, Errors}
 import org.springframework.jdbc.core.PreparedStatementSetter
 
 import java.io.ByteArrayInputStream
-import java.sql.{CallableStatement, PreparedStatement, Timestamp, Types}
+import java.sql.{CallableStatement, Date, PreparedStatement, Timestamp, Types}
 import java.time.{Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, ZoneId}
 
 class StatementBinder(val st: PreparedStatement) {
@@ -167,6 +167,24 @@ class StatementBinder(val st: PreparedStatement) {
     st.setString(idx, value)
   }
 
+  def setDate(value: Date): Unit = {
+    idx += 1
+    st.setDate(idx, value)
+  }
+
+  def setTimestamp(value: Timestamp): Unit =
+    if (value != null) {
+      idx += 1
+      st.setTimestamp(idx, value)
+    } else
+      setNull(Types.TIMESTAMP)
+
+  def setTimestamp(epochMillis: java.lang.Long): Unit =
+    if (epochMillis != null)
+      setTimestamp(new Timestamp(epochMillis))
+    else
+      setNull(Types.TIMESTAMP)
+
   def setLocalDate(value: LocalDate): Unit =
     if (value != null) {
       idx += 1
@@ -186,19 +204,6 @@ class StatementBinder(val st: PreparedStatement) {
       idx += 1
       st.setObject(idx, value)
     } else
-      setNull(Types.TIMESTAMP)
-
-  def setTimestamp(value: Timestamp): Unit =
-    if (value != null) {
-      idx += 1
-      st.setTimestamp(idx, value)
-    } else
-      setNull(Types.TIMESTAMP)
-
-  def setTimestamp(epochMillis: java.lang.Long): Unit =
-    if (epochMillis != null)
-      setTimestamp(new Timestamp(epochMillis))
-    else
       setNull(Types.TIMESTAMP)
 
   /**
