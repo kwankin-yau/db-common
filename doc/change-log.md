@@ -12,6 +12,7 @@
 - `CallableStmtBinder` 改名为 `CallableStmtHandler`, 并增加 `execute` 方法
 - 增加 `DERBY` 方言
 - `SqlDialect` 增加 `isPostgreSQL`, `isDerby`, `isSqlite` 方法
+- 引入 `com.lucendar.common.db.jdbc.DbHelper.timestampStmtSetter`
 
 
 ## 变更

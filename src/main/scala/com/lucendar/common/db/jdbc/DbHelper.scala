@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, Prepared
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
 import java.io.Closeable
-import java.sql.{Connection, PreparedStatement, ResultSet, Statement}
+import java.sql.{Connection, PreparedStatement, ResultSet, Statement, Timestamp}
 import java.time.{OffsetDateTime, ZoneId}
 import java.{lang, util}
 import java.util.Properties
@@ -564,6 +564,14 @@ object DbHelper {
 
   def dateTimeStmtSetter(value: OffsetDateTime): StatementSetter = new StatementSetter {
     override def set(binder: StatementBinder): Unit = binder.setOffsetDateTime(value)
+  }
+
+  def timestampStmtSetter(value: Timestamp): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setTimestamp(value)
+  }
+
+  def timestampStmtSetter(epochMillis: Long): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setTimestamp(epochMillis)
   }
 
   def beijingDateTimeStmtSetter(epochMillis: Long): StatementSetter = new StatementSetter {
