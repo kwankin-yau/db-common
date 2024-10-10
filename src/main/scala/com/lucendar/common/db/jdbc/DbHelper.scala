@@ -569,7 +569,8 @@ object DbHelper {
   }
 
   def dateStmtSetter(value: LocalDate): StatementSetter = new StatementSetter {
-    override def set(binder: StatementBinder): Unit = binder.setLocalDate(value)
+    // some database does not support LocalDate, USE sql.Date instead
+    override def set(binder: StatementBinder): Unit = binder.setDate(Date.valueOf(value))
   }
 
   def dateTimeStmtSetter(value: OffsetDateTime): StatementSetter = new StatementSetter {
