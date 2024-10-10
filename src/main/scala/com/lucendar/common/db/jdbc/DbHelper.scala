@@ -17,8 +17,8 @@ import org.springframework.jdbc.core.{ConnectionCallback, JdbcTemplate, Prepared
 import org.springframework.jdbc.datasource.DataSourceTransactionManager
 
 import java.io.Closeable
-import java.sql.{Connection, PreparedStatement, ResultSet, Statement, Timestamp}
-import java.time.{OffsetDateTime, ZoneId}
+import java.sql.{Connection, Date, PreparedStatement, ResultSet, Statement, Timestamp}
+import java.time.{LocalDate, OffsetDateTime, ZoneId}
 import java.{lang, util}
 import java.util.Properties
 import javax.sql.DataSource
@@ -560,6 +560,16 @@ object DbHelper {
 
   def boolStatementSetter(value: Boolean): StatementSetter = new StatementSetter {
     override def set(binder: StatementBinder): Unit = binder.setBool(value)
+  }
+
+  def dateStmtSetter(value: Date): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = {
+      binder.setDate(value)
+    }
+  }
+
+  def dateStmtSetter(value: LocalDate): StatementSetter = new StatementSetter {
+    override def set(binder: StatementBinder): Unit = binder.setLocalDate(value)
   }
 
   def dateTimeStmtSetter(value: OffsetDateTime): StatementSetter = new StatementSetter {
