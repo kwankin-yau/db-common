@@ -61,6 +61,9 @@ trait DbSupport {
 
   protected def existsQryEx(sql: String, setter: StatementSetter): Boolean = existsQry(sql, StatementSetterWrapper(setter))
 
+  protected def tableExists(schemaName: String, tableName: String): Boolean = jdbc.execute(new ConnectionCallback[Boolean] {
+    override def doInConnection(con: Connection): Boolean = sqlDialect.tableExists(con, schemaName, tableName)
+  })
 
   protected def tableExists(tableName: String): Boolean = jdbc.execute(new ConnectionCallback[Boolean] {
     override def doInConnection(con: Connection): Boolean = sqlDialect.tableExists(con, defaultSchemaName, tableName)
