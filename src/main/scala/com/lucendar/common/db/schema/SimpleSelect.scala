@@ -2,10 +2,11 @@ package com.lucendar.common.db.schema
 
 
 import com.lucendar.common.db.rest.SortColumn
+import com.lucendar.common.db.types.SqlDialect
 import com.lucendar.common.types.rest.Pagination
 import info.gratour.common.error.{ErrorWithCode, Errors}
 
-class SimpleSelect(sql: String) {
+class SimpleSelect(sql: String, val sqlDialect: SqlDialect) {
 
   private val str = new StringBuilder(sql)
   private val whereClause = new StringBuilder()
@@ -103,7 +104,10 @@ class SimpleSelect(sql: String) {
       if (limit != null || offset != null)
         throw new ErrorWithCode(Errors.ILLEGAL_STATE, "pagination and limit/offset can not be both applied.")
 
-      paginationClause = " LIMIT " + pagination.limit + " OFFSET " + pagination.offset()
+      if (sqlDialect != null && sqlDialect.isDerby)
+        paginationClause = " OFFSET " + pagination.offset() + " ROWS FETCH FIRST " + pagination.limit + " ROWS ONLY"
+      else
+        paginationClause = " LIMIT " + pagination.limit + " OFFSET " + pagination.offset()
     }
 
     this
@@ -111,7 +115,7 @@ class SimpleSelect(sql: String) {
 
   def paginate(
                 limit: Int,
-                page : Int // 1 based
+                page: Int // 1 based
               ): SimpleSelect =
     paginate(new Pagination(limit, page))
 
@@ -157,11 +161,19 @@ class SimpleSelect(sql: String) {
       r.append(" ORDER BY ").append(orderClause)
 
     if (limit != null || offset != null) {
-      if (limit != null)
-        r.append(" LIMIT " + limit)
+      if (sqlDialect != null && sqlDialect.isDerby) {
+        if (offset != null)
+          r.append(" OFFSET ").append(offset).append(" ROWS")
 
-      if (offset != null)
-        r.append(" OFFSET " + offset)
+        if (limit != null)
+          r.append(" FETCH FIRST ").append(limit).append(" ROWS ONLY")
+      } else {
+        if (limit != null)
+          r.append(" LIMIT " + limit)
+        if (offset != null)
+          r.append(" OFFSET " + offset)
+      }
+
     } else if (addPaginationClause && (paginationClause != null))
       r.append(paginationClause)
 
@@ -211,8 +223,9 @@ class SimpleSelect(sql: String) {
 
 
 object SimpleSelect {
-  def apply(sql: String): SimpleSelect =
-    new SimpleSelect(sql)
+  def apply(sql: String, sqlDialect: SqlDialect): SimpleSelect = {
+    new SimpleSelect(sql, sqlDialect)
+  }
 
 
   def mapColumnName(columnName: String): String = {

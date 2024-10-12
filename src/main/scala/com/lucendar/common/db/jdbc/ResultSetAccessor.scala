@@ -212,7 +212,7 @@ class ResultSetAccessor(val resultSet: ResultSet) {
     colIndex += 1
     rs.getBigDecimal(colIndex)
   }
-  def getDate(): Date = {
+  def date(): Date = {
     colIndex += 1
     rs.getDate(colIndex)
   }
@@ -283,6 +283,14 @@ class ResultSetAccessor(val resultSet: ResultSet) {
   def convenientDateTimeStr(): String = convenientDateTimeStr(null)
 
   def beijingConvDateTimeStr(): String = BeijingConv.odtToStr(offsetDateTime());
+
+  def beijingConvTimestampStr(): String = {
+    val ts = timestamp()
+    if (ts != null)
+      BeijingConv.millisToString(ts.getTime)
+    else
+      null
+  }
 
 
   def epochMillisLong(): Long = {
