@@ -29,6 +29,10 @@ trait SqlDialect {
   def isPostgreSQL: Boolean = id == SqlDialects.POSTGRESQL
   def isDerby: Boolean = id == SqlDialects.DERBY
   def isSqlite: Boolean = id == SqlDialects.SQLITE
+  def isH2: Boolean = id == SqlDialects.H2
+  def isOracle: Boolean = id == SqlDialects.ORACLE
+  def isMySql: Boolean = id == SqlDialects.MYSQL
+  def isSqlServer: Boolean = id == SqlDialects.SQL_SERVER
 
   def stringValueLiteral(s: String): String
 
